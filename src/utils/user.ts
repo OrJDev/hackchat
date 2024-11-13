@@ -7,8 +7,8 @@ export const getUserAndRedirect = query(async () => {
   "use server";
 
   const event = getRequestEvent()!;
-  console.log(event.request.url);
   const url = new URL(event.request.url);
+
   if (
     url.pathname === "/auth" ||
     url.pathname === "/auth/github" ||
@@ -17,13 +17,16 @@ export const getUserAndRedirect = query(async () => {
     if (event.locals.session) {
       throw redirect("/dashboard");
     }
-    const newSession = await getSession(event, authOptions);
-    event.locals.session = newSession;
-    if (newSession) {
-      throw redirect("/dashboard");
+    if (event.locals.session !== null) {
+      const newSession = await getSession(event, authOptions);
+      event.locals.session = newSession;
+      if (newSession) {
+        throw redirect("/dashboard");
+      }
     }
   } else {
-    if (!event.locals.session) {
+    if (event.locals.session === null) throw redirect("/auth");
+    if (event.locals.session === undefined) {
       const newSession = await getSession(event, authOptions);
       event.locals.session = newSession;
       if (!newSession) {
@@ -31,6 +34,7 @@ export const getUserAndRedirect = query(async () => {
       }
     }
   }
+
   return true;
 }, "get-user");
 
