@@ -1,12 +1,11 @@
 import { useAuth } from "@solid-mediakit/auth/client";
-import { A, useLocation, useNavigate } from "@solidjs/router";
+import { A, useLocation } from "@solidjs/router";
 import { createMemo, createSignal, Show, VoidComponent } from "solid-js";
 import { wrapWithTry } from "~/utils/helpers";
 import { RenderUserImage } from "./RenderUserImage";
 
 export const NavBar: VoidComponent = () => {
   const [signOut, setSignOut] = createSignal(false);
-  const navigate = useNavigate();
   const auth = useAuth();
   const location = useLocation();
 
@@ -43,9 +42,7 @@ export const NavBar: VoidComponent = () => {
           onClick={async () => {
             await wrapWithTry(async () => {
               setSignOut(true);
-              await auth.signOut({ redirect: false });
-              setSignOut(false);
-              navigate("/auth", { replace: true });
+              await auth.signOut({ redirect: true, redirectTo: "/auth" });
             });
           }}
           class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-white font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"

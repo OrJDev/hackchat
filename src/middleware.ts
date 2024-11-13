@@ -6,7 +6,7 @@ import { redirect } from "@solidjs/router";
 const paths = {
   "/": false,
   "/dashboard": true,
-  "/auth": null,
+  // "/auth": null,
 } satisfies Record<string, boolean | null>;
 
 export default createMiddleware({

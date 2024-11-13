@@ -23,6 +23,10 @@ type AllowedStatus = "initial" | "pending" | "success";
 
 const Auth: VoidComponent = () => {
   const [status, setStatus] = createSignal<AllowedStatus>("initial");
+  const auth = useAuth();
+
+  const loading = () => auth.status() === "loading" || status() === "success";
+
   return (
     <>
       <Title>HackChat - Login</Title>
@@ -40,10 +44,10 @@ const Auth: VoidComponent = () => {
                 name={provider}
                 disabled={() => status() !== "initial"}
                 onStatusUpdate={(newStatus) => setStatus(newStatus)}
+                loading={loading}
               />
             )}
           </For>
-
           <div class="my-3 w-[80%] rounded-lg bg-gray-200 h-[0.5px]" />
           <p class="text-gray-300 font-semibold text-sm w-full text-center">
             For privacy of the users, you are required to Sign In before sending
@@ -61,6 +65,7 @@ const SignInMethod: Component<{
   name: "github" | "discord";
   onStatusUpdate: (newStatus: AllowedStatus) => void;
   disabled: Accessor<boolean>;
+  loading: Accessor<boolean>;
 }> = (props) => {
   const [status, setStatus] = createSignal<AllowedStatus>("initial");
   const auth = useAuth();
@@ -78,7 +83,7 @@ const SignInMethod: Component<{
   );
 
   const disabled = createMemo(() => {
-    if (props.disabled()) return true;
+    if (props.disabled() || props.loading()) return true;
     return status() === "success";
   });
 
@@ -92,10 +97,21 @@ const SignInMethod: Component<{
       }}
       class={`flex gap-2 items-center w-full justify-center transition-all select-none ${
         props.name === "github"
-          ? "bg-[#24292e] hover:bg-[#555] hover:shadow-[#555]"
-          : "hover:shadow-[#5865F2] bg-[#5865F2] hover:bg-opacity-80 "
-      } text-white px-[14px] h-12 rounded-lg font-medium`}
+          ? `${
+              disabled()
+                ? "bg-[#24292e]/30 "
+                : "hover:bg-[#555] hover:shadow-[#555] bg-[#24292e] "
+            }`
+          : `${
+              disabled()
+                ? "bg-[#5865F2]/50 animate-pulse"
+                : "hover:shadow-[#5865F2] hover:bg-opacity-80 bg-[#5865F2]"
+            }`
+      } text-white px-[14px] h-12 rounded-lg font-medium ${
+        props.loading() ? "animate-pulse" : ""
+      }`}
       onClick={async () => {
+        console.log(props.loading(), props.disabled());
         setStatus("pending");
         await wrapWithTry(
           async () =>
