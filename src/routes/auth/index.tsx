@@ -66,11 +66,14 @@ const SignInMethod: Component<{
   const auth = useAuth();
   const navigate = useNavigate();
 
+  let r = false;
+
   createEffect(
     on(status, (s) => {
-      if (s !== "initial") {
-        props.onStatusUpdate(s);
+      if (s === "initial" && r) {
+        return (r = true);
       }
+      props.onStatusUpdate(s);
     })
   );
 

@@ -15,7 +15,11 @@ const AuthProvider: VoidComponent = () => {
         return navigate("/404");
       }
       if (status === "authenticated") {
-        window.close();
+        if (window.opener) {
+          window.close();
+        } else {
+          navigate("/dashboard");
+        }
       } else if (status === "unauthenticated") {
         void auth.signIn(params.provider);
       }
