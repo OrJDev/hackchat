@@ -3,7 +3,6 @@ import { A, useLocation, useNavigate } from "@solidjs/router";
 import { createMemo, createSignal, Show, VoidComponent } from "solid-js";
 import { wrapWithTry } from "~/utils/helpers";
 import { RenderUserImage } from "./RenderUserImage";
-import { revalidateProtected } from "~/utils/user";
 
 export const NavBar: VoidComponent = () => {
   const [signOut, setSignOut] = createSignal(false);
@@ -45,7 +44,6 @@ export const NavBar: VoidComponent = () => {
             await wrapWithTry(async () => {
               setSignOut(true);
               await auth.signOut({ redirect: false });
-              await revalidateProtected();
               setSignOut(false);
               navigate("/auth", { replace: true });
             });

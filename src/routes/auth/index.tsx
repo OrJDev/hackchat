@@ -16,21 +16,11 @@ import { capitalize } from "~/utils/string";
 import { useAuth } from "@solid-mediakit/auth/client";
 import { openAndWait, wrapWithTry } from "~/utils/helpers";
 import toast from "solid-toast";
-import {
-  assertProtected,
-  getUserAndRedirect,
-  revalidateProtected,
-} from "~/utils/user";
 import { LoadingIndicator } from "~/components";
-
-export const route = {
-  preload: async () => await getUserAndRedirect(),
-};
 
 type AllowedStatus = "initial" | "pending" | "success";
 
 const Auth: VoidComponent = () => {
-  assertProtected();
   const [status, setStatus] = createSignal<AllowedStatus>("initial");
   return (
     <div class="flex flex-col gap-4 items-center h-full w-full">
@@ -108,7 +98,6 @@ const SignInMethod: Component<{
               async () => {
                 const newSession = await auth.refetch(true);
                 if (newSession.status === "authenticated") {
-                  await revalidateProtected();
                   setStatus("success");
                   toast.success(`Welcome ${newSession.data.user.name}`);
                   navigate("/dashboard");

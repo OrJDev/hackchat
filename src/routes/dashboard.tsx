@@ -1,14 +1,7 @@
 import { useAuth } from "@solid-mediakit/auth/client";
 import { VoidComponent } from "solid-js";
-import { assertProtected, getUserAndRedirect } from "~/utils/user";
-
-export const route = {
-  preload: async () => await getUserAndRedirect(),
-};
 
 const Dashboard: VoidComponent = () => {
-  assertProtected();
-
   const auth = useAuth();
 
   return (

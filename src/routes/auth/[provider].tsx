@@ -1,14 +1,8 @@
 import { useAuth } from "@solid-mediakit/auth/client";
 import { useNavigate, useParams } from "@solidjs/router";
 import { createEffect, on, VoidComponent } from "solid-js";
-import { assertProtected, getUserAndRedirect } from "~/utils/user";
-
-export const route = {
-  preload: async () => await getUserAndRedirect(),
-};
 
 const AuthProvider: VoidComponent = () => {
-  assertProtected();
   const params = useParams();
   const auth = useAuth();
   const navigate = useNavigate();
