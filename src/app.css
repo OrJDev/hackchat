@@ -5,3 +5,22 @@
 body {
   background-color: #000;
 }
+
+/* Custom scrollbar styles */
+.scrollbar::-webkit-scrollbar {
+  width: 8px; /* Set scrollbar width (height for horizontal scrollbar) */
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #9b4dca; /* Scrollbar color */
+  border-radius: 4px; /* Rounded edges */
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #7c3aed; /* Hover color */
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: #2d2d2d; /* Track color */
+  border-radius: 4px;
+}

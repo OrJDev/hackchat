@@ -1,6 +1,7 @@
 import { createCaller, error$ } from "@solid-mediakit/prpc";
 import { authOptions } from "./auth";
 import { getSession } from "@solid-mediakit/auth";
+import { prisma } from "./db";
 
 export const helloCaller = createCaller
   .use(() => {
@@ -22,5 +23,5 @@ export const userCaller = createCaller.use(async ({ event$ }) => {
       status: 401,
     });
   }
-  return session;
+  return { session, prisma };
 });

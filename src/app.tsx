@@ -1,9 +1,9 @@
 // @refresh reload
 import "./app.css";
 import { MetaProvider, Title } from "@solidjs/meta";
-import { Router } from "@solidjs/router";
+import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Suspense } from "solid-js";
+import { ParentComponent, Show, Suspense } from "solid-js";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { SessionProvider } from "@solid-mediakit/auth/client";
 import { Toaster } from "solid-toast";
@@ -20,7 +20,7 @@ export default function App() {
             <QueryClientProvider client={queryClient}>
               <Suspense>
                 <NavBar />
-                <div class="h-screen w-screen py-[180px]">{props.children}</div>
+                <WithStyling>{props.children}</WithStyling>
                 <Toaster
                   toastOptions={{
                     position: "top-right",
@@ -42,3 +42,16 @@ export default function App() {
     </Router>
   );
 }
+
+const WithStyling: ParentComponent = (props) => {
+  const location = useLocation();
+  return (
+    <div
+      class={`h-screen w-screen ${
+        location.pathname === "/dashboard" ? "py-[96px]" : "py-[180px]"
+      }`}
+    >
+      {props.children}
+    </div>
+  );
+};

@@ -16,7 +16,7 @@ export const NavBar: VoidComponent = () => {
   );
 
   return (
-    <nav class="w-full h-24 p-3 flex items-center px-12 justify-between gap-2 fixed top-0 left-0 right-0 border-b-[0.5px] border-b-gray-100/20">
+    <nav class="w-full bg-[#000] z-[999] h-24 p-3 flex items-center px-3 sm:px-12 justify-between gap-2 fixed top-0 left-0 right-0 border-b-[0.5px] border-b-gray-100/20">
       <RenderUserImage />
 
       <Show

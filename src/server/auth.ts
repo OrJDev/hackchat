@@ -1,14 +1,16 @@
 import { type SolidAuthConfig } from "@solid-mediakit/auth";
 import Discord from "@auth/core/providers/discord";
 import Github from "@auth/core/providers/github";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./db";
 import { serverEnv } from "~/env/server";
+import { MyPrismaAdapter } from "./adapter";
+import { Contact } from "@prisma/client";
 
 declare module "@auth/core/types" {
   export interface Session {
     user: {
       id: string;
+      contacts: Contact[];
     } & DefaultSession["user"];
   }
 }
@@ -22,7 +24,7 @@ export const authOptions: SolidAuthConfig = {
       return session;
     },
   },
-  adapter: PrismaAdapter(prisma),
+  adapter: MyPrismaAdapter(prisma),
   providers: [
     Discord({
       clientId: serverEnv.DISCORD_ID,

@@ -41,6 +41,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  created_at DateTime @default(now())
+  contacts Contact[]
 }
 
 model VerificationToken {
@@ -48,4 +50,10 @@ model VerificationToken {
   token      String   @unique
   expires    DateTime
   @@unique([identifier, token])
+}
+
+model Contact {
+  id            String    @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
