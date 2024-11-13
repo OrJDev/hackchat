@@ -17,37 +17,41 @@ import { useAuth } from "@solid-mediakit/auth/client";
 import { openAndWait, wrapWithTry } from "~/utils/helpers";
 import toast from "solid-toast";
 import { LoadingIndicator } from "~/components";
+import { Title } from "@solidjs/meta";
 
 type AllowedStatus = "initial" | "pending" | "success";
 
 const Auth: VoidComponent = () => {
   const [status, setStatus] = createSignal<AllowedStatus>("initial");
   return (
-    <div class="flex flex-col gap-4 items-center h-full w-full">
-      <h1 class="text-3xl font-bold text-offwhite">
-        Log In To{" "}
-        <span class="decoration-offwhite underline decoration-dotted text-purple-500">
-          HackChat
-        </span>
-      </h1>
-      <div class="flex flex-col gap-3 w-[300px] items-center">
-        <For each={["github", "discord"] as const}>
-          {(provider) => (
-            <SignInMethod
-              name={provider}
-              disabled={() => status() !== "initial"}
-              onStatusUpdate={(newStatus) => setStatus(newStatus)}
-            />
-          )}
-        </For>
+    <>
+      <Title>HackChat - Login</Title>
+      <div class="flex flex-col gap-4 items-center h-full w-full">
+        <h1 class="text-3xl font-bold text-offwhite">
+          Log In To{" "}
+          <span class="decoration-offwhite underline decoration-dotted text-purple-500">
+            HackChat
+          </span>
+        </h1>
+        <div class="flex flex-col gap-3 w-[300px] items-center">
+          <For each={["github", "discord"] as const}>
+            {(provider) => (
+              <SignInMethod
+                name={provider}
+                disabled={() => status() !== "initial"}
+                onStatusUpdate={(newStatus) => setStatus(newStatus)}
+              />
+            )}
+          </For>
 
-        <div class="my-3 w-[80%] rounded-lg bg-gray-200 h-[0.5px]" />
-        <p class="text-gray-300 font-semibold text-sm w-full text-center">
-          For privacy of the users, you are required to Sign In before sending
-          any messages.
-        </p>
+          <div class="my-3 w-[80%] rounded-lg bg-gray-200 h-[0.5px]" />
+          <p class="text-gray-300 font-semibold text-sm w-full text-center">
+            For privacy of the users, you are required to Sign In before sending
+            any messages.
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

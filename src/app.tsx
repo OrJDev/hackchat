@@ -15,7 +15,7 @@ export default function App() {
     <Router
       root={(props) => (
         <MetaProvider>
-          <Title>Create JD App</Title>
+          <Title>HackChat</Title>
           <SessionProvider>
             <QueryClientProvider client={queryClient}>
               <Suspense>

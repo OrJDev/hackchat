@@ -1,6 +1,8 @@
 import { useAuth } from "@solid-mediakit/auth/client";
+import { Title } from "@solidjs/meta";
 import { useNavigate, useParams } from "@solidjs/router";
 import { createEffect, on, VoidComponent } from "solid-js";
+import { capitalize } from "~/utils/string";
 
 const AuthProvider: VoidComponent = () => {
   const params = useParams();
@@ -21,14 +23,17 @@ const AuthProvider: VoidComponent = () => {
   );
 
   return (
-    <div class="h-full w-full flex items-center justify-center flex-col gap-4">
-      <div class="text-white text-2xl font-bold animate-pulse">
-        Redirecting...
+    <>
+      <Title>HackChat - {capitalize(params.provider)} Login</Title>
+      <div class="h-full w-full flex items-center justify-center flex-col gap-4">
+        <div class="text-white text-2xl font-bold animate-pulse">
+          Redirecting...
+        </div>
+        <p class="text-offwhite text-lg font-medium">
+          Please Wait While HackChat Is Validating Your Request
+        </p>
       </div>
-      <p class="text-offwhite text-lg font-medium">
-        Please Wait While HackChat Is Validating Your Request
-      </p>
-    </div>
+    </>
   );
 };
 
