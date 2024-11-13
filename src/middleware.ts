@@ -3,26 +3,30 @@ import { createMiddleware } from "@solidjs/start/middleware";
 import { authOptions } from "./server/auth";
 import { redirect } from "@solidjs/router";
 
-const pathsToPreload = [
-  "/",
-  "/auth",
-  "/auth/github",
-  "/auth/discord",
-  "/dashboard",
-];
+const paths = {
+  "/": false,
+  "/dashboard": true,
+  "/auth": null,
+} satisfies Record<string, boolean | null>;
 
 export default createMiddleware({
   onRequest: async (event) => {
     const url = new URL(event.request.url);
-    if (pathsToPreload.includes(url.pathname)) {
-      const session = await getSession(event, authOptions);
+    if (url.pathname in paths) {
+      const k = paths[url.pathname as keyof typeof paths];
+      const session =
+        event.locals.session !== undefined
+          ? event.locals.session
+          : await getSession(event, authOptions);
+      // preload all paths
       event.locals.session = session;
-
-      if (url.pathname.startsWith("/auth")) {
+      if (k === null) {
+        // nulls mean signed in users aren't allowed
         if (session) {
           return redirect("/dashboard");
         }
-      } else {
+      } else if (k === true) {
+        // true means only signed in users allowed
         if (!session) {
           return redirect("/auth");
         }

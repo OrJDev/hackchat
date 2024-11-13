@@ -5,7 +5,7 @@ import { createEffect, on, VoidComponent } from "solid-js";
 import { capitalize } from "~/utils/string";
 
 const AuthProvider: VoidComponent = () => {
-  const params = useParams();
+  const params = useParams<{ provider: string }>();
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -22,15 +22,25 @@ const AuthProvider: VoidComponent = () => {
     })
   );
 
+  const getText = () =>
+    auth.status() === "loading"
+      ? "Validating Your Request"
+      : auth.status() === "unauthenticated"
+      ? `Redirecting To ${capitalize(params.provider)}`
+      : `Signing You In`;
+
   return (
     <>
       <Title>HackChat - {capitalize(params.provider)} Login</Title>
-      <div class="h-full w-full flex items-center justify-center flex-col gap-4">
+      <div class="h-full w-full flex items-center  flex-col gap-4">
         <div class="text-white text-2xl font-bold animate-pulse">
-          Redirecting...
+          {getText().split(" ")[0]}...
         </div>
-        <p class="text-offwhite text-lg font-medium">
-          Please Wait While HackChat Is Validating Your Request
+        <p class="text-offwhite text-sm sm:text-lg font-medium">
+          Please Wait While HackChat Is{" "}
+          <span class="animate-pulse decoration-dotted underline decoration-purple-500">
+            {getText()}
+          </span>
         </p>
       </div>
     </>
