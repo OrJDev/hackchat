@@ -1,16 +1,19 @@
 import toast from "solid-toast";
 
-export const openAndWait = async (
+export const openAndWait = (
   url: string,
   title: string,
   fn: () => Promise<void>,
   ms = 500
 ) => {
   const w = window.open(url, title);
-  while (!w?.closed) {
-    await sleep(ms);
-  }
-  await fn();
+
+  const int = setInterval(() => {
+    if (w?.closed) {
+      clearInterval(int);
+      void fn();
+    }
+  }, ms);
 };
 
 export const sleep = (ms = 500) =>

@@ -5,6 +5,7 @@ import {
   createSignal,
   For,
   Show,
+  startTransition,
   VoidComponent,
 } from "solid-js";
 import { AiFillGithub } from "solid-icons/ai";
@@ -93,12 +94,12 @@ const SignInMethod: Component<{
       } text-white px-[14px] h-12 rounded-lg font-medium`}
       onClick={async () => {
         setStatus("pending");
-        await wrapWithTry(
-          async () =>
-            await openAndWait(
-              `${window.location.origin}/auth/${props.name}`,
-              `Sign In With ${capitalize(props.name)}`,
-              async () => {
+        await wrapWithTry(async () =>
+          openAndWait(
+            `${window.location.origin}/auth/${props.name}`,
+            `Sign In With ${capitalize(props.name)}`,
+            async () => {
+              startTransition(async () => {
                 const newSession = await auth.refetch(true);
                 if (newSession.status === "authenticated") {
                   setStatus("success");
@@ -108,8 +109,9 @@ const SignInMethod: Component<{
                   toast.error("Couldn't Sign You In");
                   setStatus("initial");
                 }
-              }
-            )
+              });
+            }
+          )
         );
       }}
     >
