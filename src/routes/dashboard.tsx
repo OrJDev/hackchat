@@ -1,3 +1,4 @@
+import "~/styles/scroll.css";
 import { useAuth } from "@solid-mediakit/auth/client";
 import { Title } from "@solidjs/meta";
 import { FaSolidPlus } from "solid-icons/fa";
@@ -7,8 +8,8 @@ import {
   createEffect,
   createSignal,
   For,
+  on,
   onCleanup,
-  onMount,
   Show,
   VoidComponent,
 } from "solid-js";
@@ -32,7 +33,7 @@ const Dashboard: VoidComponent = () => {
     });
 
   const messages = () =>
-    new Array(10).fill(null).map((_, i) => {
+    new Array(18).fill(null).map((_, i) => {
       return {
         me: i % 2 === 0,
         message:
@@ -43,6 +44,19 @@ const Dashboard: VoidComponent = () => {
     });
 
   const isSmall = createMediaQuery("(max-width: 767px)");
+
+  let chatRef: HTMLDivElement;
+
+  createEffect(
+    on(
+      () => [selectedContact(), chatRef],
+      () => {
+        if (chatRef) {
+          chatRef.scrollTop = chatRef.scrollHeight;
+        }
+      }
+    )
+  );
 
   return (
     <>
@@ -83,25 +97,28 @@ const Dashboard: VoidComponent = () => {
                   );
                 }}
               </For>
-              <div class="w-full h-[100px]" />
+              <Empty />
             </ul>
           </div>
         </Show>
         <Show
           when={selectedContact()}
           fallback={
-            <div class="h-full w-full flex items-center flex-col gap-2">
-              <h1 class="font-bold text-white text-2xl py-12">
-                Select A Contact
-              </h1>
-            </div>
+            isSmall() ? null : (
+              <div class="h-full w-full flex items-center flex-col gap-2">
+                <h1 class="font-bold text-white text-2xl py-12">
+                  Select A Contact
+                </h1>
+              </div>
+            )
           }
         >
           {(contact) => (
             <div
-              class={`col-span-2 overflow-y-auto max-h-[calc(100vh-80px)] ${
+              ref={(r) => (chatRef = r)}
+              class={`col-span-2 ${
                 isSmall() ? "w-screen" : ""
-              } animate-fadeIn`}
+              } h-full animate-fadeIn overflow-y-scroll scrollbar`}
             >
               <RenderChat
                 messages={messages}
@@ -122,22 +139,23 @@ const Dashboard: VoidComponent = () => {
 
 export default Dashboard;
 
+const Empty: Component<{ sm?: boolean; last?: boolean }> = (props) => (
+  <div
+    class={`w-full ${props.sm ? "h-[10px]" : "h-[100px]"} ${
+      props.last ? "isEmpty" : ""
+    }`}
+  />
+);
+
 const RenderChat: Component<{
   messages: Accessor<{ me: boolean; message: string }[]>;
   isSmall: Accessor<boolean>;
   resetContact: () => void;
   contact: Accessor<Contact>;
 }> = (props) => {
-  let chatRef: HTMLDivElement;
-  onMount(() => {
-    const lastMessage = chatRef.querySelector(".message:last-child");
-    if (lastMessage) {
-      lastMessage.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  });
   return (
-    <div class="flex flex-col gap-2 justify-center px-8">
-      <div class="font-bold transition-all gap-2 h-[50px] flex items-center text-offwhite text-2xl top-0 right-0 left-0 sticky w-full bg-[#000]">
+    <div class="flex flex-col gap-2 px-8 h-full w-full">
+      <div class="font-bold px-4 transition-all gap-2 min-h-[80px] flex items-center text-offwhite text-2xl top-0 right-0 left-0 sticky w-screen bg-[#000]">
         <Show when={props.isSmall()}>
           <button
             onClick={() => props.resetContact()}
@@ -150,9 +168,11 @@ const RenderChat: Component<{
             />
           </button>
         </Show>
-        {props.contact().name}
+        <span>{props.contact().name}</span>
       </div>
-      <div class="flex flex-col gap-2 pb-12" ref={(r) => (chatRef = r)}>
+
+      <div class="flex flex-col gap-2 pb-12">
+        <Empty sm />
         <For each={props.messages()}>
           {(message) => {
             return (
@@ -168,6 +188,7 @@ const RenderChat: Component<{
             );
           }}
         </For>
+        <Empty last />
       </div>
     </div>
   );

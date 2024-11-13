@@ -1,9 +1,9 @@
 // @refresh reload
-import "./app.css";
+import "./styles/app.css";
 import { MetaProvider, Title } from "@solidjs/meta";
 import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { ParentComponent, Show, Suspense } from "solid-js";
+import { ParentComponent, Suspense } from "solid-js";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { SessionProvider } from "@solid-mediakit/auth/client";
 import { Toaster } from "solid-toast";
