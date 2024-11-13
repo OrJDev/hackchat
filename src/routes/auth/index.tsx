@@ -1,9 +1,11 @@
 import {
   Accessor,
   Component,
+  createEffect,
   createMemo,
   createSignal,
   For,
+  on,
   Show,
   startTransition,
   VoidComponent,
@@ -70,6 +72,18 @@ const SignInMethod: Component<{
     if (props.disabled()) return true;
     return status() === "success";
   });
+
+  let r = false;
+
+  createEffect(
+    on(status, (s) => {
+      if (!r && s === "initial") {
+        r = true;
+      } else {
+        props.onStatusUpdate(s);
+      }
+    })
+  );
 
   return (
     <button
