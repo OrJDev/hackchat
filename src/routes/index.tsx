@@ -1,5 +1,6 @@
 import { A } from "@solidjs/router";
-import { For, VoidComponent } from "solid-js";
+import { VoidComponent } from "solid-js";
+import { Disclist } from "~/components";
 
 const Home: VoidComponent = () => {
   return (
@@ -35,25 +36,15 @@ const Home: VoidComponent = () => {
         </A>{" "}
         <br /> And Was Created Using The Following Technologies
       </span>
-      <ul class="flex flex-col items-center">
-        <For
-          each={Object.entries({
-            pRPC: "https://github.com/solidjs-community/mediakit/tree/main/packages/auth/solid",
-            "Solid Auth":
-              "https://github.com/solidjs-community/mediakit/tree/main/packages/auth/solid",
-            PusherJS: "https://pusher.com",
-            Prisma: "https://www.prisma.io",
-          })}
-        >
-          {([name, link]) => (
-            <li class="list-disc text-white font-bold w-[100px]">
-              <A target="__blank" href={link} class="text-blue-400">
-                {name}
-              </A>
-            </li>
-          )}
-        </For>
-      </ul>
+      <Disclist
+        data={{
+          pRPC: "https://github.com/solidjs-community/mediakit/tree/main/packages/auth/solid",
+          "Solid Auth":
+            "https://github.com/solidjs-community/mediakit/tree/main/packages/auth/solid",
+          PusherJS: "https://pusher.com",
+          Prisma: "https://www.prisma.io",
+        }}
+      />
     </main>
   );
 };

@@ -10,7 +10,11 @@ declare module "@auth/core/types" {
   export interface Session {
     user: {
       id: string;
-      contacts: Contact[];
+      contacts: (Contact & {
+        id: string;
+        name: string | null;
+        image: string | null;
+      })[];
     } & DefaultSession["user"];
   }
 }

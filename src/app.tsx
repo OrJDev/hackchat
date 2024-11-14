@@ -52,7 +52,10 @@ const WithStyling: ParentComponent = (props) => {
   return (
     <div
       class={`h-screen w-screen ${
-        location.pathname === "/dashboard" ? "py-[96px]" : "py-[180px]"
+        location.pathname === "/dashboard" ||
+        location.pathname.startsWith("/contact")
+          ? "py-[96px]"
+          : "py-[180px]"
       }`}
     >
       {props.children}

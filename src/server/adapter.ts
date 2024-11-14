@@ -3,7 +3,20 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 
 export const authInclude = {
-  contacts: true,
+  contactInitiated: {
+    include: {
+      user: {
+        select: { image: true, id: true, name: true },
+      },
+    },
+  }, // Fetch contacts the user initiated
+  contactReceived: {
+    include: {
+      user: {
+        select: { image: true, id: true, name: true },
+      },
+    },
+  }, // Fetch contacts the user received
 };
 
 export function MyPrismaAdapter(p: PrismaClient): Adapter {
@@ -18,8 +31,12 @@ export function MyPrismaAdapter(p: PrismaClient): Adapter {
       },
     });
     if (!userAndSession) return null;
+    const combinedContacts = [
+      ...userAndSession?.user?.contactInitiated,
+      ...userAndSession?.user?.contactReceived,
+    ];
     const { user, ...session } = userAndSession;
-    return { user, session };
+    return { user: { ...user, contacts: combinedContacts }, session };
   };
 
   return base as Adapter;
