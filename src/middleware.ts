@@ -7,13 +7,17 @@ const paths = {
   "/": false,
   "/dashboard": true,
   "/auth": null,
+  "/contact": true,
 } satisfies Record<string, boolean | null>;
 
 export default createMiddleware({
   onRequest: async (event) => {
     const url = new URL(event.request.url);
-    if (url.pathname in paths) {
-      const k = paths[url.pathname as keyof typeof paths];
+    const cond = url.pathname.startsWith("/contact/");
+    if (cond || url.pathname in paths) {
+      const k = cond
+        ? paths["/contact"]
+        : paths[url.pathname as keyof typeof paths];
       const session =
         event.locals.session !== undefined
           ? event.locals.session

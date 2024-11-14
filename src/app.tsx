@@ -3,7 +3,7 @@ import "./styles/app.css";
 import { Meta, MetaProvider, Title } from "@solidjs/meta";
 import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { ParentComponent, Suspense } from "solid-js";
+import { ErrorBoundary, ParentComponent, Suspense } from "solid-js";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { SessionProvider } from "@solid-mediakit/auth/client";
 import { Toaster } from "solid-toast";
@@ -53,15 +53,25 @@ export default function App() {
 const WithStyling: ParentComponent = (props) => {
   const location = useLocation();
   return (
-    <div
-      class={`h-screen w-screen ${
-        location.pathname === "/dashboard" ||
-        location.pathname.startsWith("/contact")
-          ? "py-[96px]"
-          : "py-[180px]"
-      }`}
+    <ErrorBoundary
+      fallback={(err) => {
+        return (
+          <div class="text-xl sm:text-2xl font-bold text-red-500">
+            {JSON.stringify(err, null, 2)}
+          </div>
+        );
+      }}
     >
-      {props.children}
-    </div>
+      <div
+        class={`h-screen w-screen ${
+          location.pathname === "/dashboard" ||
+          location.pathname.startsWith("/contact")
+            ? "py-[96px]"
+            : "py-[180px]"
+        }`}
+      >
+        {props.children}
+      </div>
+    </ErrorBoundary>
   );
 };
