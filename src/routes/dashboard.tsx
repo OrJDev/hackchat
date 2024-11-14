@@ -13,16 +13,10 @@ import {
   Show,
   VoidComponent,
 } from "solid-js";
-import { FiArrowLeft, FiSearch } from "solid-icons/fi";
+import { FiArrowLeft } from "solid-icons/fi";
 import { createMediaQuery } from "@solid-primitives/media";
 import { faker } from "@faker-js/faker";
-import {
-  clearContacts,
-  ContactProcedure,
-  createContactLink,
-} from "~/server/contacts";
 import { wrapWithTry } from "~/utils/helpers";
-import { LoadingIndicator } from "~/components";
 import { isServer } from "solid-js/web";
 import toast from "solid-toast";
 
@@ -42,12 +36,6 @@ const Dashboard: VoidComponent = () => {
   const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
     null
   );
-
-  const createLink = createContactLink(() => ({
-    onMutate() {
-      setAddingContact(true);
-    },
-  }));
 
   const messages = () =>
     new Array(18).fill(null).map((_, i) => {
@@ -90,9 +78,7 @@ const Dashboard: VoidComponent = () => {
                 <h2 class="text-xl font-bold">Your Contacts</h2>
 
                 <button
-                  onClick={() =>
-                    wrapWithTry(() => createLink.mutateAsync(undefined))
-                  }
+                  onClick={() => setAddingContact(true)}
                   class="border group transition-colors hover:border-gray-400 w-8 h-8 flex items-center justify-center border-solid border-gray-300 rounded-full"
                 >
                   <FaSolidPlus
@@ -151,9 +137,9 @@ const Dashboard: VoidComponent = () => {
       </main>
       <Show when={addingContact()}>
         <AddContact
+          userId={auth.session()?.user.id!}
           contacts={contacts}
           close={() => setAddingContact(false)}
-          data={createLink.data}
         />
       </Show>
     </>
@@ -225,7 +211,7 @@ interface Contact {
 const AddContact: Component<{
   contacts: Accessor<Array<Contact>>;
   close: () => void;
-  data: ContactProcedure;
+  userId: string;
 }> = (props) => {
   const [closing, setClosing] = createSignal(false);
 
@@ -241,7 +227,7 @@ const AddContact: Component<{
   const origin = () =>
     isServer ? process.env.AUTH_URL : window.location.origin;
 
-  const link = () => `${origin()}/contact/${props.data?.id}`;
+  const link = () => `${origin()}/contact/${props.userId}`;
 
   const copyLink = async () => {
     await wrapWithTry(async () => {
@@ -274,37 +260,31 @@ const AddContact: Component<{
             Copy the link bellow and share it with a friend you want to talk
             with on <strong class="text-purple-500 font-bold">HackChat</strong>.
           </p>
-          <Show when={props.data} fallback={<LoadingIndicator />}>
-            <pre
-              class={`${
-                !props.data ? "bg-zinc-400 animate-pulse" : "bg-zinc-500"
-              } sm:bg-[#000] w-full rounded-lg p-3 flex items-center justify-center`}
+          <pre
+            class={`bg-zinc-500 sm:bg-[#000] w-full rounded-lg p-3 flex items-center justify-center`}
+          >
+            <span class="text-gray-500 font-bold text-xs hidden sm:block">
+              {link()}
+            </span>
+            <button
+              onClick={() => void copyLink()}
+              class="flex sm:hidden w-full h-full items-center justify-center"
             >
-              <span class="text-gray-500 font-bold text-xs hidden sm:block">
-                {link()}
-              </span>
-              <button
-                disabled={!props.data}
-                onClick={() => void copyLink()}
-                class="flex sm:hidden w-full h-full items-center justify-center"
+              <svg
+                class={`h-6 w-6 fill-current text-offwhite`}
+                viewBox="0 0 20 20"
               >
-                <svg
-                  class={`h-6 w-6 fill-current text-offwhite`}
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M16.667 1.66675H6.66699C5.74783 1.66675 5.00033 2.41425 5.00033 3.33341V5.00008H3.33366C2.41449 5.00008 1.66699 5.74758 1.66699 6.66675V16.6667C1.66699 17.5859 2.41449 18.3334 3.33366 18.3334H13.3337C14.2528 18.3334 15.0003 17.5859 15.0003 16.6667V15.0001H16.667C17.5862 15.0001 18.3337 14.2526 18.3337 13.3334V3.33341C18.3337 2.41425 17.5862 1.66675 16.667 1.66675ZM13.3337 16.6667H3.33366V6.66675H5.00033V13.3334C5.00033 14.2526 5.74783 15.0001 6.66699 15.0001H13.3337V16.6667ZM16.6645 13.3334H6.66699V3.33341H16.667L16.6645 13.3334Z"
-                    fill="currentColor"
-                  ></path>
-                </svg>
-              </button>
-            </pre>
-          </Show>
+                <path
+                  d="M16.667 1.66675H6.66699C5.74783 1.66675 5.00033 2.41425 5.00033 3.33341V5.00008H3.33366C2.41449 5.00008 1.66699 5.74758 1.66699 6.66675V16.6667C1.66699 17.5859 2.41449 18.3334 3.33366 18.3334H13.3337C14.2528 18.3334 15.0003 17.5859 15.0003 16.6667V15.0001H16.667C17.5862 15.0001 18.3337 14.2526 18.3337 13.3334V3.33341C18.3337 2.41425 17.5862 1.66675 16.667 1.66675ZM13.3337 16.6667H3.33366V6.66675H5.00033V13.3334C5.00033 14.2526 5.74783 15.0001 6.66699 15.0001H13.3337V16.6667ZM16.6645 13.3334H6.66699V3.33341H16.667L16.6645 13.3334Z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </button>
+          </pre>
 
           <div class="mb-3 w-full bg-gray-500 h-[0.5px] rounded-lg" />
         </div>
         <button
-          disabled={!props.data}
           onClick={() => void copyLink()}
           class="font-bold sm:flex text-white hidden items-center justify-center disabled:animate-pulse disabled:bg-purple-400 bg-purple-500 rounded-lg w-[80%] p-3 mt-auto"
         >

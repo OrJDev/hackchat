@@ -43,8 +43,6 @@ model User {
   accounts         Account[]
   sessions         Session[]
   created_at       DateTime      @default(now())
-  contactLinks     ContactLink[] @relation("OpenedBy")
-  acceptedLinks    ContactLink[] @relation("AcceptedBy")
   contactReceived  Contact[]     @relation("ContactUser")
   contactInitiated Contact[]
 }
@@ -64,13 +62,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-model ContactLink {
-  id         String @id @default(cuid())
-  openedById String
-  openedBy   User   @relation("OpenedBy", fields: [openedById], references: [id], onDelete: Cascade)
-
-  acceptedbyId String?
-  acceptedby   User?   @relation("AcceptedBy", fields: [acceptedbyId], references: [id], onDelete: Cascade)
 }
