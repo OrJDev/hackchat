@@ -32,7 +32,7 @@ export default createMiddleware({
       } else if (k === true) {
         // true means only signed in users allowed
         if (!session) {
-          return redirect("/auth");
+          return redirect(`/auth?r=${encodeURIComponent(url.pathname)}`);
         }
       }
     }

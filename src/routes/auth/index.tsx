@@ -12,7 +12,7 @@ import {
 } from "solid-js";
 import { AiFillGithub } from "solid-icons/ai";
 import { FaBrandsDiscord, FaBrandsGoogle } from "solid-icons/fa";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { capitalize } from "~/utils/string";
 import { useAuth } from "@solid-mediakit/auth/client";
 import { allowedProviders, openAndWait, wrapWithTry } from "~/utils/helpers";
@@ -24,6 +24,12 @@ type AllowedStatus = "initial" | "pending" | "success";
 
 const Auth: VoidComponent = () => {
   const [status, setStatus] = createSignal<AllowedStatus>("initial");
+  const [searchParams] = useSearchParams();
+
+  const r = () =>
+    searchParams.r && typeof searchParams.r === "string"
+      ? searchParams.r
+      : undefined;
 
   return (
     <>
@@ -39,6 +45,7 @@ const Auth: VoidComponent = () => {
           <For each={allowedProviders}>
             {(provider) => (
               <SignInMethod
+                r={r}
                 name={provider}
                 disabled={() => status() !== "initial"}
                 onStatusUpdate={(newStatus) => setStatus(newStatus)}
@@ -60,6 +67,7 @@ const Auth: VoidComponent = () => {
 export default Auth;
 
 const SignInMethod: Component<{
+  r: Accessor<string | null | undefined>;
   name: (typeof allowedProviders)[number];
   onStatusUpdate: (newStatus: AllowedStatus) => void;
   disabled: Accessor<boolean>;
@@ -128,7 +136,7 @@ const SignInMethod: Component<{
                 if (newSession.status === "authenticated") {
                   setStatus("success");
                   toast.success(`Welcome ${newSession.data.user.name}`);
-                  navigate("/dashboard");
+                  navigate(props.r() ?? "/dashboard");
                 } else {
                   toast.error("Couldn't Sign You In");
                   setStatus("initial");
