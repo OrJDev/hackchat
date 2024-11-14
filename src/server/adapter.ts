@@ -13,7 +13,7 @@ export function MyPrismaAdapter(p: PrismaClient): Adapter {
           include: {
             contactInitiated: {
               include: {
-                user: {
+                contactUser: {
                   select,
                 },
               },
@@ -31,7 +31,12 @@ export function MyPrismaAdapter(p: PrismaClient): Adapter {
     });
     if (!userAndSession) return null;
     const combinedContacts = [
-      ...userAndSession?.user?.contactInitiated,
+      ...userAndSession?.user?.contactInitiated.map((e) => {
+        return {
+          ...e,
+          user: e.contactUser,
+        };
+      }),
       ...userAndSession?.user?.contactReceived,
     ];
     const { user, ...session } = userAndSession;
