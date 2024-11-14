@@ -1,6 +1,6 @@
 // @refresh reload
 import "./styles/app.css";
-import { MetaProvider, Title } from "@solidjs/meta";
+import { Meta, MetaProvider, Title } from "@solidjs/meta";
 import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { ParentComponent, Suspense } from "solid-js";
@@ -15,6 +15,10 @@ export default function App() {
     <Router
       root={(props) => (
         <MetaProvider>
+          <Meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+          />
           <Title>HackChat</Title>
           <SessionProvider>
             <QueryClientProvider client={queryClient}>

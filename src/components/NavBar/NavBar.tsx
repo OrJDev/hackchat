@@ -37,21 +37,32 @@ export const NavBar: VoidComponent = () => {
           </A>
         }
       >
-        <button
-          disabled={signOut() || isFakeNavBar()}
-          onClick={async () => {
-            await wrapWithTry(async () => {
-              setSignOut(true);
-              await auth.signOut({ redirect: true, redirectTo: "/auth" });
-            });
-          }}
-          class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-white font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
-          style={{
-            "box-shadow": `0 0 0 1px #555`,
-          }}
-        >
-          Log Out
-        </button>
+        <div class="flex gap-2 items-center">
+          <A
+            href="/dashboard"
+            class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-white font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
+            style={{
+              "box-shadow": `0 0 0 1px #555`,
+            }}
+          >
+            Dashboard
+          </A>
+          <button
+            disabled={signOut() || isFakeNavBar()}
+            onClick={async () => {
+              await wrapWithTry(async () => {
+                setSignOut(true);
+                await auth.signOut({ redirect: true, redirectTo: "/auth" });
+              });
+            }}
+            class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-white font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
+            style={{
+              "box-shadow": `0 0 0 1px #555`,
+            }}
+          >
+            Log Out
+          </button>
+        </div>
       </Show>
     </nav>
   );

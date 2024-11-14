@@ -17,10 +17,16 @@
   border-radius: 4px;
 }
 
+.scrollbar {
+  touch-action: auto; /* Re-enables touch interactions */
+}
+
 ::-webkit-scrollbar:not(.scrollbar) {
   display: none;
 }
 
 html {
   overflow-y: hidden;
+  touch-action: none; /* Disables touch-based interactions */
+  -ms-touch-action: none; /* For older IE/Edge versions */
 }
