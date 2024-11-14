@@ -11,11 +11,11 @@ import {
   VoidComponent,
 } from "solid-js";
 import { AiFillGithub } from "solid-icons/ai";
-import { FaBrandsDiscord } from "solid-icons/fa";
+import { FaBrandsDiscord, FaBrandsGoogle } from "solid-icons/fa";
 import { useNavigate } from "@solidjs/router";
 import { capitalize } from "~/utils/string";
 import { useAuth } from "@solid-mediakit/auth/client";
-import { openAndWait, wrapWithTry } from "~/utils/helpers";
+import { allowedProviders, openAndWait, wrapWithTry } from "~/utils/helpers";
 import toast from "solid-toast";
 import { LoadingIndicator } from "~/components";
 import { Title } from "@solidjs/meta";
@@ -36,7 +36,7 @@ const Auth: VoidComponent = () => {
           </span>
         </h1>
         <div class="flex flex-col gap-3 w-[300px] items-center">
-          <For each={["github", "discord"] as const}>
+          <For each={allowedProviders}>
             {(provider) => (
               <SignInMethod
                 name={provider}
@@ -60,7 +60,7 @@ const Auth: VoidComponent = () => {
 export default Auth;
 
 const SignInMethod: Component<{
-  name: "github" | "discord";
+  name: (typeof allowedProviders)[number];
   onStatusUpdate: (newStatus: AllowedStatus) => void;
   disabled: Accessor<boolean>;
 }> = (props) => {
@@ -90,7 +90,11 @@ const SignInMethod: Component<{
       disabled={disabled()}
       style={{
         "box-shadow": `0 0 0 1px ${
-          props.name === "github" ? "#24292e" : "#5865F2"
+          props.name === "github"
+            ? "#24292e"
+            : props.name === "google"
+            ? "#DB4437"
+            : "#5865F2"
         }`,
       }}
       class={`flex gap-2 items-center w-full justify-center transition-all select-none ${
@@ -99,6 +103,12 @@ const SignInMethod: Component<{
               disabled()
                 ? "bg-[#24292e]/40"
                 : "hover:bg-[#555] hover:shadow-[#555] bg-[#24292e]"
+            }`
+          : props.name === "google"
+          ? `${
+              disabled()
+                ? "bg-[#DB4437]/40"
+                : "hover:shadow-[#DB4437]/50 hover:bg-[#DB4437]/30 bg-[#DB4437]/70"
             }`
           : `${
               disabled()
@@ -134,6 +144,8 @@ const SignInMethod: Component<{
       </Show>
       {props.name === "github" ? (
         <AiFillGithub size={25} />
+      ) : props.name === "google" ? (
+        <FaBrandsGoogle size={25} />
       ) : (
         <FaBrandsDiscord size={25} />
       )}

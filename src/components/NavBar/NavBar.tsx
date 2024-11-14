@@ -12,7 +12,8 @@ export const NavBar: VoidComponent = () => {
   const isFakeNavBar = createMemo(
     () =>
       location.pathname === "/auth/github" ||
-      location.pathname === "/auth/discord"
+      location.pathname === "/auth/discord" ||
+      location.pathname === "/auth/google"
   );
 
   return (

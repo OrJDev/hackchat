@@ -47,3 +47,5 @@ export const wrapWithTry = async (fn: () => Promise<any>) => {
     toast.error(getToastMessage(e));
   }
 };
+
+export const allowedProviders = ["google", "discord", "github"] as const;

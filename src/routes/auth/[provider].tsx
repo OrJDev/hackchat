@@ -2,6 +2,7 @@ import { useAuth } from "@solid-mediakit/auth/client";
 import { Title } from "@solidjs/meta";
 import { useNavigate, useParams } from "@solidjs/router";
 import { createEffect, on, VoidComponent } from "solid-js";
+import { allowedProviders } from "~/utils/helpers";
 import { capitalize } from "~/utils/string";
 
 const AuthProvider: VoidComponent = () => {
@@ -11,7 +12,7 @@ const AuthProvider: VoidComponent = () => {
 
   createEffect(
     on(auth.status, (status) => {
-      if (params.provider !== "discord" && params.provider !== "github") {
+      if (!allowedProviders.includes(params.provider as any)) {
         return navigate("/404");
       }
       if (status === "authenticated") {

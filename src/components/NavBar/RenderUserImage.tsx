@@ -20,6 +20,7 @@ export const RenderUserImage: Component<{
     >
       {getType() === "img" ? (
         <img
+          referrerPolicy="no-referrer"
           src={props.img as unknown as string}
           style={{ "object-fit": "contain" }}
           class={`absolute rounded-full inset-0`}

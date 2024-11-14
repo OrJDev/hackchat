@@ -14,6 +14,8 @@ export const serverScheme = z.object({
   DATABASE_URL: z.string(),
   PUSHER_APP_ID: z.string(),
   PUSHER_APP_SECRET: z.string(),
+  GOOGLE_ID: z.string(),
+  GOOGLE_SECRET: z.string(),
 });
 
 export const clientScheme = z.object({

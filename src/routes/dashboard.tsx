@@ -312,10 +312,7 @@ const AddContact: Component<{
         </button>
         <p class="text-gray-400 text-center font-bold text-sm">
           Keep in mind, anyone who gets this link can click on it and get in
-          your contacts. Also, this link can only be used{" "}
-          <span class="underline decoration-dotted decoration-purple-500">
-            once
-          </span>
+          your contacts.
         </p>
       </div>
     </>
