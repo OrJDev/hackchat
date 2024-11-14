@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { SessionProvider } from "@solid-mediakit/auth/client";
 import { Toaster } from "solid-toast";
 import { NavBar } from "./components";
+import { ContactsProvider } from "./utils/contacts";
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -23,19 +24,21 @@ export default function App() {
           <SessionProvider>
             <QueryClientProvider client={queryClient}>
               <Suspense>
-                <NavBar />
-                <WithStyling>{props.children}</WithStyling>
-                <Toaster
-                  toastOptions={{
-                    position: "top-right",
-                    style: {
-                      "background-color": "#24292e",
-                      color: "white",
-                      "font-weight": "500",
-                    },
-                    unmountDelay: 1000,
-                  }}
-                />
+                <ContactsProvider>
+                  <NavBar />
+                  <WithStyling>{props.children}</WithStyling>
+                  <Toaster
+                    toastOptions={{
+                      position: "top-right",
+                      style: {
+                        "background-color": "#24292e",
+                        color: "white",
+                        "font-weight": "500",
+                      },
+                      unmountDelay: 1000,
+                    }}
+                  />
+                </ContactsProvider>
               </Suspense>
             </QueryClientProvider>
           </SessionProvider>

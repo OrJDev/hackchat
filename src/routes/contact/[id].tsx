@@ -1,8 +1,10 @@
 import { Title } from "@solidjs/meta";
-import { useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import { VoidComponent } from "solid-js";
+import toast from "solid-toast";
 import { RenderPRPCData, RenderUserImage } from "~/components";
 import { acceptContact, getContactLink } from "~/server/contacts";
+import { alterContacts } from "~/utils/contacts";
 import { wrapWithTry } from "~/utils/helpers";
 
 const Contact: VoidComponent = () => {
@@ -12,6 +14,9 @@ const Contact: VoidComponent = () => {
   const acceptLink = acceptContact();
 
   const disabled = () => !params.id || acceptLink.isPending;
+  const navigate = useNavigate();
+
+  const setContacts = alterContacts();
 
   return (
     <>
@@ -38,7 +43,18 @@ const Contact: VoidComponent = () => {
               disabled={disabled()}
               onClick={() =>
                 void wrapWithTry(() =>
-                  acceptLink.mutateAsync({ id: params.id })
+                  acceptLink.mutateAsync({ id: params.id }).then(() => {
+                    toast.success(`${link.data?.name} Is Now In Your Contacts`);
+                    setContacts((prev) => [
+                      {
+                        img: link.data?.image,
+                        name: link.data?.name,
+                        id: link.data!.id,
+                      },
+                      ...prev,
+                    ]);
+                    navigate("/dashboard");
+                  })
                 )
               }
               class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-green-500 font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
@@ -50,6 +66,10 @@ const Contact: VoidComponent = () => {
             </button>
             <div class="h-[50px] w-[0.5px] rounded-lg bg-gray-400" />
             <button
+              onClick={() => {
+                toast.success("You Can Change Your Mind Anytime");
+                navigate("/dashboard");
+              }}
               disabled={disabled()}
               class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-red-500 font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
               style={{
@@ -62,7 +82,7 @@ const Contact: VoidComponent = () => {
           <p class="text-offwhite font-medium max-w-[300px] sm:max-w-[400px] text-center">
             By accepting {link.data?.name}'s request, he will be able to send
             you messages, you can also ignore this request for now and accept it
-            within 30 days.
+            later.
           </p>
         </RenderPRPCData>
       </main>

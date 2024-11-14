@@ -1,7 +1,8 @@
-import { createCaller } from "@solid-mediakit/prpc";
+import { createCaller, error$ } from "@solid-mediakit/prpc";
 import { z } from "zod";
 import { prisma } from "~/server/db";
 import { sendError } from "../prpc";
+import { trigger } from "../pusher";
 
 export const getContactLink = createCaller(
   z.object({ id: z.string() }),
@@ -31,7 +32,7 @@ export const acceptContact = createCaller(
   z.object({ id: z.string() }),
   async ({ session$, input$ }) => {
     if (input$.id === session$.user.id) {
-      return sendError("Sadly, you can't accept your own requests");
+      return error$("Sadly, you can't accept your own requests");
     }
     const currentUserId = session$.user.id;
     const user = await prisma.user.findUnique({
@@ -40,7 +41,7 @@ export const acceptContact = createCaller(
       },
     });
     if (!user) {
-      return sendError("No Such Invitation Link");
+      return error$("No Such Invitation Link");
     }
 
     const alreadyInContacts = await prisma.contact.findFirst({
@@ -58,7 +59,7 @@ export const acceptContact = createCaller(
       },
     });
     if (alreadyInContacts) {
-      return sendError("This user is already in your contacts");
+      return error$("This user is already in your contacts");
     }
     await prisma.contact.create({
       data: {
@@ -66,6 +67,12 @@ export const acceptContact = createCaller(
         contactUserId: input$.id,
       },
     });
+    await trigger(input$.id, "contact_added", {
+      name: session$.user.name,
+      img: session$.user.image,
+      id: session$.user.id,
+    });
+
     return true;
   },
   { protected: true, type: "action" }

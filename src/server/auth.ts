@@ -11,9 +11,11 @@ declare module "@auth/core/types" {
     user: {
       id: string;
       contacts: (Contact & {
-        id: string;
-        name: string | null;
-        image: string | null;
+        user: {
+          id: string;
+          name: string | null;
+          image: string | null;
+        };
       })[];
     } & DefaultSession["user"];
   }

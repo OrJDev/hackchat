@@ -4,6 +4,7 @@ export const RenderUserImage: Component<{
   img?: string | null;
   name?: string | null;
   sm?: boolean;
+  alwaysSm?: boolean;
 }> = (props) => {
   const getType = () => (props.img ? ("img" as const) : ("text" as const));
 
@@ -11,7 +12,11 @@ export const RenderUserImage: Component<{
     <div
       class={`relative rounded-full bg-gray-400 ${
         getType() === "text" ? "flex items-center justify-center" : ""
-      } ${props.sm ? "h-10 w-10 sm:w-16 sm:h-16 " : "w-16 h-16 "}`}
+      } ${
+        props.sm || props.alwaysSm
+          ? `h-10 w-10 ${props.alwaysSm ? "" : "sm:w-16 sm:h-16"}`
+          : "w-16 h-16 "
+      }`}
     >
       {getType() === "img" ? (
         <img

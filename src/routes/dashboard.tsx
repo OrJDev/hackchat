@@ -1,7 +1,7 @@
 import "~/styles/scroll.css";
 import { useAuth } from "@solid-mediakit/auth/client";
 import { Title } from "@solidjs/meta";
-import { FaSolidPlus } from "solid-icons/fa";
+import { FaSolidArrowDown, FaSolidPlus } from "solid-icons/fa";
 import {
   Accessor,
   Component,
@@ -15,23 +15,17 @@ import {
 } from "solid-js";
 import { FiArrowLeft } from "solid-icons/fi";
 import { createMediaQuery } from "@solid-primitives/media";
-import { faker } from "@faker-js/faker";
 import { wrapWithTry } from "~/utils/helpers";
 import { isServer } from "solid-js/web";
 import toast from "solid-toast";
+import { RenderUserImage } from "~/components";
+import { useContacts } from "~/utils/contacts";
 
 const Dashboard: VoidComponent = () => {
   const auth = useAuth();
   const [addingContact, setAddingContact] = createSignal(false);
-  console.log(auth.session()?.user.contacts);
-  const contacts = () =>
-    new Array(18).fill(null).map(() => {
-      return {
-        img: faker.image.avatar(), // Generates a realistic avatar image URL
-        name: faker.person.fullName(), // Generates a realistic full name
-        notifications: faker.number.int({ min: 1, max: 50 }), // Generates a random number between 1 and 50
-      };
-    });
+
+  const contacts = useContacts();
 
   const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
     null
@@ -91,19 +85,45 @@ const Dashboard: VoidComponent = () => {
               <div class="w-full bg-purple-500 h-[0.5px] rounded-lg" />
             </div>
 
-            <ul class="flex flex-col gap-1 mt-2 pb-24">
-              <For each={contacts()}>
-                {(contact) => {
-                  return (
-                    <RenderContact
-                      contact={contact}
-                      onClick={() => setSelectedContact(contact)}
-                    />
-                  );
-                }}
-              </For>
-              <Empty />
-            </ul>
+            <Show
+              when={contacts().length}
+              fallback={
+                <div class="flex flex-col gap-5 items-center text-center">
+                  <span class="font-bold text-white">No Contacts?</span>
+                  <FaSolidArrowDown color="white" size={30} />
+                  <div class="text-offwhite text-sm font-medium ">
+                    Share Your{" "}
+                    <span class="underline decoration-dotted decoration-purple-500">
+                      Contact URL
+                    </span>
+                    To Get To Know More People
+                  </div>
+                  <button
+                    class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-white font-bold transition-all text-sm w-32 h-12 rounded-lg p-3 flex items-center justify-center"
+                    style={{
+                      "box-shadow": `0 0 0 1px #555`,
+                    }}
+                    onClick={() => setAddingContact(true)}
+                  >
+                    Share
+                  </button>
+                </div>
+              }
+            >
+              <ul class="flex flex-col gap-1 mt-2 pb-24">
+                <For each={contacts()}>
+                  {(contact) => {
+                    return (
+                      <RenderContact
+                        contact={contact}
+                        onClick={() => setSelectedContact(contact)}
+                      />
+                    );
+                  }}
+                </For>
+                <Empty />
+              </ul>
+            </Show>
           </div>
         </Show>
         <Show
@@ -204,9 +224,9 @@ const RenderChat: Component<{
 };
 
 interface Contact {
-  img: string;
+  img?: string | null;
   notifications?: number;
-  name: string;
+  name?: string | null;
 }
 const AddContact: Component<{
   contacts: Accessor<Array<Contact>>;
@@ -247,7 +267,7 @@ const AddContact: Component<{
       <div
         class={`w-[90vw] ${
           closing() ? "animate-fadeOut" : "animate-fadeIn"
-        } transition-all scrollbar sm:w-[70vw] md:w-[50vw] z-[999] bg-zinc-900 fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-xl flex gap-2 overflow-y-scroll items-center p-5 flex-col`}
+        } transition-all scrollbar sm:w-[70vw] lg:w-[50vw] z-[999] bg-zinc-900 fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 rounded-xl flex gap-2 overflow-y-scroll items-center p-5 flex-col`}
       >
         <div class="flex flex-col gap-2 w-full items-center">
           <h1 class="text-xl font-bold text-white">
@@ -261,14 +281,14 @@ const AddContact: Component<{
             with on <strong class="text-purple-500 font-bold">HackChat</strong>.
           </p>
           <pre
-            class={`bg-zinc-500 sm:bg-[#000] w-full rounded-lg p-3 flex items-center justify-center`}
+            class={`bg-zinc-500 md:bg-[#000] w-full rounded-lg p-3 flex items-center justify-center`}
           >
-            <span class="text-gray-500 font-bold text-xs hidden sm:block">
+            <span class="text-gray-500 font-bold text-xs hidden md:block">
               {link()}
             </span>
             <button
               onClick={() => void copyLink()}
-              class="flex sm:hidden w-full h-full items-center justify-center"
+              class="flex md:hidden w-full h-full items-center justify-center"
             >
               <svg
                 class={`h-6 w-6 fill-current text-offwhite`}
@@ -286,7 +306,7 @@ const AddContact: Component<{
         </div>
         <button
           onClick={() => void copyLink()}
-          class="font-bold sm:flex text-white hidden items-center justify-center disabled:animate-pulse disabled:bg-purple-400 bg-purple-500 rounded-lg w-[80%] p-3 mt-auto"
+          class="font-bold md:flex text-white hidden items-center justify-center disabled:animate-pulse disabled:bg-purple-400 bg-purple-500 rounded-lg w-[80%] p-3 mt-auto"
         >
           Copy Link And Close
         </button>
@@ -312,9 +332,10 @@ const RenderContact: Component<{
       onClick={props.onClick}
       class="py-2 w-full text-offwhite relative h-14 flex gap-2 items-center border-b-[0.5px] border-b-gray-100/20"
     >
-      <img
-        src={props.contact.img}
-        class="object-contain h-10 w-10 rounded-full"
+      <RenderUserImage
+        alwaysSm
+        name={props.contact.name}
+        img={props.contact.img}
       />
       <div class="w-[0.5px] h-full bg-gray-100/20 rounded-lg" />
       <span
