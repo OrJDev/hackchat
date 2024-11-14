@@ -67,9 +67,17 @@ const Dashboard: VoidComponent = () => {
               isSmall() ? "w-screen" : ""
             } bg-zinc-900 text-offwhite border-r border-zinc-700 px-4 overflow-y-auto scrollbar animate-fadeIn`}
           >
-            <div class="flex w-full flex-col gap-8 sticky top-0 left-0 right-0 z-[995] bg-zinc-900 h-[80px]">
-              <div class="flex items-center justify-between w-full relative top-1/2 -translate-y-1/2">
-                <h2 class="text-xl font-bold">Your Contacts</h2>
+            <div class="flex w-full flex-col px-4 gap-8 fixed top-[96px] left-0 z-[995] bg-zinc-900 h-[80px]">
+              <div class="flex items-center  justify-between w-full relative top-1/2 -translate-y-1/2">
+                <h2
+                  class={`text-xl font-bold ${
+                    selectedContact() ? "text-purple-400" : ""
+                  }`}
+                >
+                  {selectedContact()
+                    ? selectedContact()?.name
+                    : "Your Contacts"}
+                </h2>
 
                 <button
                   onClick={() => setAddingContact(true)}
@@ -184,8 +192,8 @@ const RenderChat: Component<{
 }> = (props) => {
   return (
     <div class="flex flex-col gap-2 px-8 h-full w-full">
-      <div class="font-bold px-4 transition-all gap-2 h-[80px] flex items-center text-offwhite text-2xl top-[96px] fixed z-[992] w-full bg-[#000]">
-        <Show when={props.isSmall()}>
+      <Show when={props.isSmall()}>
+        <div class="font-bold px-4 transition-all gap-2 h-[80px] flex items-center text-offwhite text-2xl top-[96px] fixed z-[992] w-full bg-[#000]">
           <button
             onClick={() => props.resetContact()}
             class="border group transition-colors hover:border-gray-400 w-8 h-8 flex items-center justify-center border-solid border-gray-300 rounded-full"
@@ -196,9 +204,9 @@ const RenderChat: Component<{
               class="fill-current text-white group-hover:text-gray-400 transition-all"
             />
           </button>
-        </Show>
-        <span>{props.contact().name}</span>
-      </div>
+          <span>{props.contact().name}</span>
+        </div>
+      </Show>
 
       <div class="flex flex-col gap-2 pb-12 mt-[80px]">
         <Empty sm />
