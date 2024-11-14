@@ -1,7 +1,7 @@
 import { createCaller, error$ } from "@solid-mediakit/prpc";
 import { z } from "zod";
 import { prisma } from "~/server/db";
-import { sendError } from "../prpc";
+import { isInContacts, sendError } from "../prpc";
 import { trigger } from "../pusher";
 
 export const getContactLink = createCaller(
@@ -42,21 +42,7 @@ export const acceptContact = createCaller(
     if (!user) {
       return error$("No Such Invitation Link");
     }
-    const alreadyInContacts = await prisma.contact.findFirst({
-      where: {
-        OR: [
-          {
-            userId: session$.user.id,
-            contactUserId: input$.id,
-          },
-          {
-            userId: input$.id,
-            contactUserId: session$.user.id,
-          },
-        ],
-      },
-    });
-    if (alreadyInContacts) {
+    if (await isInContacts(session$.user.id, user.id)) {
       return error$("This user is already in your contacts");
     }
     await prisma.contact.create({
