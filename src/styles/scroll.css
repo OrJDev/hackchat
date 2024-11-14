@@ -30,10 +30,3 @@ html {
   touch-action: none !important; /* Disables touch-based interactions */
   -ms-touch-action: none !important; /* For older IE/Edge versions */
 }
-
-/* for mobile? */
-.scrollbar {
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-  scrollbar-color: #9b4dca #2d2d2d; /* Custom thumb and track color */
-  scrollbar-width: thin; /* Sets the width */
-}

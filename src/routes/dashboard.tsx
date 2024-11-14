@@ -20,9 +20,6 @@ import { faker } from "@faker-js/faker";
 const Dashboard: VoidComponent = () => {
   const auth = useAuth();
   const [addingContact, setAddingContact] = createSignal(false);
-  const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
-    null
-  );
 
   const contacts = () =>
     new Array(18).fill(null).map(() => {
@@ -32,6 +29,10 @@ const Dashboard: VoidComponent = () => {
         notifications: faker.number.int({ min: 1, max: 50 }), // Generates a random number between 1 and 50
       };
     });
+
+  const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
+    contacts()[0]
+  );
 
   const messages = () =>
     new Array(18).fill(null).map((_, i) => {
@@ -142,7 +143,7 @@ export default Dashboard;
 
 const Empty: Component<{ sm?: boolean; last?: boolean }> = (props) => (
   <div
-    class={`w-[10px] ${props.sm ? "h-[10px]" : "h-[100px]"} ${
+    class={`w-[10px] ${props.sm ? "h-[30px]" : "h-[100px]"} ${
       props.last ? "isEmpty" : ""
     }`}
   />
@@ -156,7 +157,7 @@ const RenderChat: Component<{
 }> = (props) => {
   return (
     <div class="flex flex-col gap-2 px-8 h-full w-full">
-      <div class="font-bold px-4 transition-all gap-2 min-h-[80px] flex items-center text-offwhite text-2xl top-0 right-0 left-0 sticky w-full bg-[#000]">
+      <div class="font-bold px-4 transition-all gap-2 h-[80px] flex items-center text-offwhite text-2xl top-[96px] fixed z-[992] w-full bg-[#000]">
         <Show when={props.isSmall()}>
           <button
             onClick={() => props.resetContact()}
@@ -172,7 +173,7 @@ const RenderChat: Component<{
         <span>{props.contact().name}</span>
       </div>
 
-      <div class="flex flex-col gap-2 pb-12">
+      <div class="flex flex-col gap-2 pb-12 mt-[80px]">
         <Empty sm />
         <For each={props.messages()}>
           {(message) => {
