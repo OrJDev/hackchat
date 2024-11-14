@@ -2,31 +2,30 @@ import { Adapter } from "@auth/core/adapters";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 
-export const authInclude = {
-  contactInitiated: {
-    include: {
-      user: {
-        select: { image: true, id: true, name: true },
-      },
-    },
-  }, // Fetch contacts the user initiated
-  contactReceived: {
-    include: {
-      user: {
-        select: { image: true, id: true, name: true },
-      },
-    },
-  }, // Fetch contacts the user received
-};
-
 export function MyPrismaAdapter(p: PrismaClient): Adapter {
   const base = PrismaAdapter(p);
   (base as any).getSessionAndUser = async (sessionToken: string) => {
+    const select = { image: true, id: true, name: true };
     const userAndSession = await p.session.findUnique({
       where: { sessionToken },
       include: {
         user: {
-          include: authInclude,
+          include: {
+            contactInitiated: {
+              include: {
+                user: {
+                  select,
+                },
+              },
+            },
+            contactReceived: {
+              include: {
+                user: {
+                  select,
+                },
+              },
+            },
+          },
         },
       },
     });

@@ -49,7 +49,7 @@ const Contact: VoidComponent = () => {
                       {
                         img: link.data?.image,
                         name: link.data?.name,
-                        id: link.data!.id,
+                        id: link.data?.id as string,
                       },
                       ...prev,
                     ]);

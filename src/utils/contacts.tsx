@@ -5,6 +5,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  on,
   onCleanup,
   ParentComponent,
   Setter,
@@ -12,6 +13,7 @@ import {
 } from "solid-js";
 import Pusher from "pusher-js";
 import { Contact, Events } from "./events";
+import toast from "solid-toast";
 
 const contactsContext = createContext<{
   contacts: Accessor<Contact[]>;
@@ -22,18 +24,23 @@ export const ContactsProvider: ParentComponent = (props) => {
   const auth = useAuth();
   const [contacts, setContacts] = createSignal<Contact[]>([]);
 
-  const combinedContacts = createMemo(() => {
-    const userContacts = (auth.session()?.user.contacts ?? []).map((e) => {
-      return {
-        img: e.user.image,
-        name: e.user.name,
-        notifications: 0,
-        id: e.user.id,
-      } satisfies Contact;
-    });
-    const currentContacts = contacts()!;
-    return [...userContacts, ...currentContacts];
-  });
+  const combinedContacts = createMemo(
+    on(
+      () => [auth.session(), contacts()],
+      () => {
+        const userContacts = (auth.session()?.user.contacts ?? []).map((e) => {
+          return {
+            img: e.user.image,
+            name: e.user.name,
+            id: e.user.id,
+            notifications: 0,
+          } satisfies Contact;
+        });
+        const currentContacts = contacts()!;
+        return [...userContacts, ...currentContacts];
+      }
+    )
+  );
 
   let r = false;
   createEffect(() => {
@@ -51,10 +58,10 @@ export const ContactsProvider: ParentComponent = (props) => {
         return sub.bind(name, cb);
       };
 
-      //   actual events
-      event("contact_added", (data) =>
-        setContacts((prev) => [...prev, { ...data, notifications: 0 }])
-      );
+      event("contact_added", (data) => {
+        setContacts((prev) => [{ ...data, notifications: 0 }, ...prev]);
+        toast.success(`You Can Now Chat With ${data.name}`);
+      });
 
       onCleanup(() => {
         client.unsubscribe(name);

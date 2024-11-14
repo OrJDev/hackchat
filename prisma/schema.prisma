@@ -44,13 +44,13 @@ model User {
   sessions         Session[]
   created_at       DateTime      @default(now())
   contactReceived  Contact[]     @relation("ContactUser")
-  contactInitiated Contact[]
+  contactInitiated Contact[] @relation("ActualUser")
 }
 
 model Contact {
   id     String @id @default(cuid())
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation("ActualUser", fields: [userId], references: [id], onDelete: Cascade)
 
   contactUserId String
   contactUser   User   @relation("ContactUser", fields: [contactUserId], references: [id], onDelete: Cascade)

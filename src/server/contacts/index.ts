@@ -34,7 +34,6 @@ export const acceptContact = createCaller(
     if (input$.id === session$.user.id) {
       return error$("Sadly, you can't accept your own requests");
     }
-    const currentUserId = session$.user.id;
     const user = await prisma.user.findUnique({
       where: {
         id: input$.id,
@@ -43,17 +42,16 @@ export const acceptContact = createCaller(
     if (!user) {
       return error$("No Such Invitation Link");
     }
-
     const alreadyInContacts = await prisma.contact.findFirst({
       where: {
         OR: [
           {
-            userId: currentUserId,
+            userId: session$.user.id,
             contactUserId: input$.id,
           },
           {
             userId: input$.id,
-            contactUserId: currentUserId,
+            contactUserId: session$.user.id,
           },
         ],
       },
@@ -63,11 +61,12 @@ export const acceptContact = createCaller(
     }
     await prisma.contact.create({
       data: {
-        userId: currentUserId,
-        contactUserId: input$.id,
+        userId: user.id,
+        contactUserId: session$.user.id,
       },
     });
-    await trigger(input$.id, "contact_added", {
+    // let the other user know we accepted his request
+    await trigger(user.id, "contact_added", {
       name: session$.user.name,
       img: session$.user.image,
       id: session$.user.id,
