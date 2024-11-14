@@ -1,11 +1,11 @@
 /* Custom scrollbar styles */
 .scrollbar::-webkit-scrollbar {
-  width: 8px; /* Set scrollbar width (height for horizontal scrollbar) */
+  width: 8px !important; /* Set scrollbar width (height for horizontal scrollbar) */
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
-  background-color: #9b4dca; /* Scrollbar color */
-  border-radius: 4px; /* Rounded edges */
+  background-color: #9b4dca !important; /* Scrollbar color */
+  border-radius: 4px !important; /* Rounded edges */
 }
 
 .scrollbar::-webkit-scrollbar-thumb:hover {
@@ -13,20 +13,27 @@
 }
 
 .scrollbar::-webkit-scrollbar-track {
-  background: #2d2d2d; /* Track color */
-  border-radius: 4px;
+  background: #2d2d2d !important; /* Track color */
+  border-radius: 4px !important;
 }
 
 .scrollbar {
-  touch-action: auto; /* Re-enables touch interactions */
+  touch-action: auto !important; /* Re-enables touch interactions */
 }
 
 ::-webkit-scrollbar:not(.scrollbar) {
-  display: none;
+  display: none !important;
 }
 
 html {
-  overflow-y: hidden;
-  touch-action: none; /* Disables touch-based interactions */
-  -ms-touch-action: none; /* For older IE/Edge versions */
+  overflow-y: hidden !important;
+  touch-action: none !important; /* Disables touch-based interactions */
+  -ms-touch-action: none !important; /* For older IE/Edge versions */
+}
+
+/* for mobile? */
+.scrollbar {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+  scrollbar-color: #9b4dca #2d2d2d; /* Custom thumb and track color */
+  scrollbar-width: thin; /* Sets the width */
 }
