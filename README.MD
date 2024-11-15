@@ -1,5 +1,7 @@
 Some cool realtime chat app devloped using Solid.
 
+Check out the actual [site](https://hackchat-five.vercel.app/) for best showcase.
+
 1. You Send Someone An Invitation
 
 <img width="738" alt="Screenshot 2024-11-14 at 23 35 51" src="https://github.com/user-attachments/assets/946c8b21-ed30-4b9a-8b69-7ba680eaa771">

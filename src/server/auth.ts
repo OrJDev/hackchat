@@ -1,4 +1,4 @@
-import { type SolidAuthConfig } from "@solid-mediakit/auth";
+import { getSession, type SolidAuthConfig } from "@solid-mediakit/auth";
 import Discord from "@auth/core/providers/discord";
 import Github from "@auth/core/providers/github";
 import Google from "@auth/core/providers/google";
@@ -6,6 +6,7 @@ import { prisma } from "./db";
 import { serverEnv } from "~/env/server";
 import { MyPrismaAdapter } from "./adapter";
 import { Contact } from "@prisma/client";
+import { APIEvent } from "@solidjs/start/server";
 
 declare module "@auth/core/types" {
   export interface Session {
@@ -51,4 +52,9 @@ export const authOptions: SolidAuthConfig = {
   ],
   debug: false,
   basePath: import.meta.env.VITE_AUTH_PATH,
+};
+
+export const getServerSession = async (event: APIEvent) => {
+  if (event.locals.session !== undefined) return event.locals.session;
+  return await getSession(event, authOptions);
 };

@@ -61,6 +61,18 @@ const Dashboard: VoidComponent = () => {
     })
   );
 
+  createEffect(
+    on(
+      () => [selectedContact(), innerContext.status()] as const,
+      ([c, s]) => {
+        if (c && s[c.id] === false) {
+          toast.error(`${c.name} Went Offline`);
+          setSelectedContact(null);
+        }
+      }
+    )
+  );
+
   return (
     <>
       <Title>HackChat - Dashboard</Title>
@@ -201,8 +213,13 @@ const RenderChat: Component<{
   const innerContext = useInnerContext();
 
   const handleMessage = () => {
-    innerContext.sendMessage(props.contact().id, message());
-    setMessage("");
+    if (!innerContext.status()[props.contact().id]) {
+      toast.error(`${props.contact().name} Is Offline`);
+      props.resetContact();
+    } else {
+      innerContext.sendMessage(props.contact().id, message());
+      setMessage("");
+    }
   };
 
   return (
@@ -384,8 +401,16 @@ const RenderContact: Component<{
 }> = (props) => {
   return (
     <button
-      onClick={props.onClick}
-      class="py-2 w-full text-offwhite relative h-14 flex gap-2 items-center border-b-[0.5px] border-b-gray-100/20"
+      onClick={() => {
+        if (props.onClick) {
+          if (!props.contact.online) {
+            return toast.error(`${props.contact.name} Is Offline`);
+          }
+          props.onClick();
+        }
+      }}
+      disabled={props.contact.online === null}
+      class="py-2 group w-full text-offwhite relative h-14 flex gap-2 items-center border-b-[0.5px] border-b-gray-100/20"
     >
       <RenderUserImage
         alwaysSm
@@ -400,15 +425,23 @@ const RenderContact: Component<{
       >
         {props.contact.name}
       </span>
-      {!props.modal && props.contact.notifications ? (
-        <div class="absolute top-1/2 -translate-y-1/2 right-2 bg-red-500 rounded-full w-8 h-8 flex items-center justify-center">
-          <span class="text-white font-bold text-sm">
-            {props.contact.notifications > 99
-              ? "+99"
-              : props.contact.notifications}
-          </span>
+      {props.contact.online === null ? (
+        <div class="absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center">
+          <LoadingIndicator />
         </div>
-      ) : null}
+      ) : (
+        <div
+          class={`absolute animate-fadeIn top-1/2 -translate-y-1/2 right-2 border border-solid ${
+            props.contact.online ? "border-green-500" : "border-red-500"
+          } rounded-full w-8 h-8 flex items-center justify-center `}
+        >
+          <div
+            class={`h-[70%] w-[70%] rounded-full ${
+              props.contact.online ? "bg-green-300" : "bg-red-300"
+            }`}
+          />
+        </div>
+      )}
     </button>
   );
 };

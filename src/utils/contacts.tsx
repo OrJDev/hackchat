@@ -13,10 +13,11 @@ import {
   useContext,
 } from "solid-js";
 import Pusher from "pusher-js";
-import { Contact, Events } from "./events";
+import { Contact, Events, OnlineEvent } from "./events";
 import toast from "solid-toast";
 import { triggerMessage } from "~/server/messages";
 import { wrapWithTry } from "./helpers";
+import { getUrl } from "./url";
 
 function generateUniqueId(userId: string) {
   const timestamp = Date.now();
@@ -29,6 +30,7 @@ const contactsContext = createContext<{
   sendMessage: (to: string, content: string) => void;
   messages: Accessor<Record<string, Message[]>>;
   loading: Accessor<boolean>;
+  status: Accessor<Record<string, boolean | null>>;
 }>(null!);
 
 export type Message = {
@@ -112,20 +114,36 @@ export const ContactsProvider: ParentComponent = (props) => {
     setMessage((prev) => ({ ...prev, [to]: newMessages }));
   };
 
+  const [status, setStatus] = createSignal<Record<string, boolean | null>>({});
   const combinedContacts = createMemo(
     on(
-      () => [auth.session(), contacts()],
+      () => [auth.session(), contacts(), status()],
       () => {
+        const s = status();
         const userContacts = (auth.session()?.user.contacts ?? []).map((e) => {
           return {
             img: e.user.image,
             name: e.user.name,
             id: e.user.id,
             notifications: 0,
-          } satisfies Contact;
+          } satisfies Omit<Contact, "online">;
         });
         const currentContacts = contacts()!;
-        return [...userContacts, ...currentContacts];
+        return [...userContacts, ...currentContacts]
+          .map((e) => {
+            return {
+              ...e,
+              online: s[e.id] ?? null,
+            };
+          })
+          .sort((a, b) => {
+            if (a.online === b.online) return 0;
+            if (a.online === true) return -1;
+            if (b.online === true) return 1;
+            if (a.online === null) return 1;
+            if (b.online === null) return -1;
+            return a.online ? -1 : 1;
+          });
       }
     )
   );
@@ -137,7 +155,28 @@ export const ContactsProvider: ParentComponent = (props) => {
         r = true;
         const client = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
           cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+          userAuthentication: {
+            endpoint: `${getUrl()}/api/watchlist`,
+            transport: "ajax",
+          },
         });
+        client.signin();
+        const update = (ids: string[], off?: boolean) => {
+          setStatus((prev) => {
+            const newRecord: Record<string, boolean | null> = { ...prev };
+            for (const id of ids) {
+              newRecord[id] = off ? false : true;
+            }
+            return newRecord;
+          });
+        };
+        client.user.watchlist.bind("online", (event: OnlineEvent) =>
+          update(event.user_ids)
+        );
+        client.user.watchlist.bind("offline", (event: OnlineEvent) =>
+          update(event.user_ids, true)
+        );
+
         const name = `${auth.session()?.user.id!}`;
         const sub = client.subscribe(name);
         const event = <N extends keyof Events>(
@@ -172,6 +211,7 @@ export const ContactsProvider: ParentComponent = (props) => {
         sendMessage,
         messages,
         loading,
+        status,
       }}
     >
       {props.children}
