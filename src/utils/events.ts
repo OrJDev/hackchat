@@ -5,6 +5,13 @@ export interface Contact {
   id: string;
 }
 
+export interface MessageSent {
+  by: string;
+  content: string;
+  messageId: string;
+}
+
 export type Events = {
   contact_added: Contact;
+  message_sent: MessageSent;
 };

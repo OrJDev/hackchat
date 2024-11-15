@@ -6,6 +6,7 @@ import {
   Accessor,
   Component,
   createEffect,
+  createMemo,
   createSignal,
   For,
   on,
@@ -19,28 +20,33 @@ import { wrapWithTry } from "~/utils/helpers";
 import { isServer } from "solid-js/web";
 import toast from "solid-toast";
 import { RenderUserImage } from "~/components";
-import { useContacts } from "~/utils/contacts";
+import { Message, useContacts, useInnerContext } from "~/utils/contacts";
+import { AiOutlineSend } from "solid-icons/ai";
+import { Contact } from "~/utils/events";
+import { BiRegularParty } from "solid-icons/bi";
+import { useSearchParams } from "@solidjs/router";
 
 const Dashboard: VoidComponent = () => {
+  const contacts = useContacts();
   const auth = useAuth();
   const [addingContact, setAddingContact] = createSignal(false);
-
-  const contacts = useContacts();
+  const [searchParams, setParams] = useSearchParams();
+  const { messages: _messages } = useInnerContext();
 
   const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
-    null
+    searchParams.c
+      ? contacts().find((e) => e.id === searchParams.c) ?? null
+      : null
   );
 
-  const messages = () =>
-    new Array(18).fill(null).map((_, i) => {
-      return {
-        me: i % 2 === 0,
-        message:
-          i % 2 === 0
-            ? `Hey there ${selectedContact()?.name}`
-            : `How are you ${auth.session()?.user.name}`,
-      };
-    });
+  const messages = createMemo(() => {
+    const s = selectedContact();
+    if (s) {
+      const m = _messages();
+      return m[s.id] ?? [];
+    }
+    return [];
+  });
 
   const isSmall = createMediaQuery("(max-width: 767px)");
 
@@ -55,6 +61,14 @@ const Dashboard: VoidComponent = () => {
         }
       }
     )
+  );
+
+  createEffect(
+    on(selectedContact, (s) => {
+      setParams({
+        c: s?.id,
+      });
+    })
   );
 
   return (
@@ -129,7 +143,7 @@ const Dashboard: VoidComponent = () => {
                     );
                   }}
                 </For>
-                <Empty />
+                <Empty last />
               </ul>
             </Show>
           </div>
@@ -138,8 +152,8 @@ const Dashboard: VoidComponent = () => {
           when={selectedContact()}
           fallback={
             isSmall() ? null : (
-              <div class="h-full w-full flex items-center flex-col gap-2">
-                <h1 class="font-bold text-white text-2xl py-12">
+              <div class="h-full w-full flex items-center flex-col gap-2 mt-[80px]">
+                <h1 class="font-bold text-white text-2xl py-12 -ml-3">
                   Select A Contact
                 </h1>
               </div>
@@ -148,12 +162,17 @@ const Dashboard: VoidComponent = () => {
         >
           {(contact) => (
             <div
+              id="chat"
               ref={(r) => (chatRef = r)}
               class={`col-span-2 ${
                 isSmall() ? "w-screen" : ""
               } h-full animate-fadeIn overflow-y-scroll scrollbar`}
             >
               <RenderChat
+                onSentMessage={() => {
+                  chatRef.scrollTop = chatRef.scrollHeight;
+                }}
+                myId={() => auth.session()?.user.id!}
                 messages={messages}
                 isSmall={isSmall}
                 resetContact={() => setSelectedContact(null)}
@@ -178,18 +197,28 @@ export default Dashboard;
 
 const Empty: Component<{ sm?: boolean; last?: boolean }> = (props) => (
   <div
-    class={`w-[10px] ${props.sm ? "h-[30px]" : "h-[100px]"} ${
-      props.last ? "isEmpty" : ""
-    }`}
+    class={`w-[10px] ${
+      props.sm ? "h-[30px]" : props.last ? "h-[200px]" : "h-[100px]"
+    } ${props.last ? "isEmpty" : ""}`}
   />
 );
 
 const RenderChat: Component<{
-  messages: Accessor<{ me: boolean; message: string }[]>;
+  messages: Accessor<Message[]>;
   isSmall: Accessor<boolean>;
   resetContact: () => void;
   contact: Accessor<Contact>;
+  myId: Accessor<string>;
+  onSentMessage: () => void;
 }> = (props) => {
+  const [message, setMessage] = createSignal("");
+  const { sendMessage } = useInnerContext();
+
+  const handleMessage = () => {
+    sendMessage(props.contact().id, message());
+    setMessage("");
+  };
+
   return (
     <div class="flex flex-col gap-2 px-8 h-full w-full">
       <Show when={props.isSmall()}>
@@ -207,35 +236,59 @@ const RenderChat: Component<{
           <span>{props.contact().name}</span>
         </div>
       </Show>
-
-      <div class="flex flex-col gap-2 pb-12 mt-[80px]">
-        <Empty sm />
-        <For each={props.messages()}>
-          {(message) => {
-            return (
-              <div
-                class={`message ${
-                  message.me
-                    ? "bg-purple-500 ml-auto border-purple-700 rounded-bl-lg"
-                    : "border border-solid border-gray-700 mr-auto rounded-br-lg"
-                } w-fit flex items-center p-3 text-white border border-solid rounded-tl-lg rounded-tr-lg`}
-              >
-                {message.message}
-              </div>
-            );
+      <Show
+        when={props.messages().length}
+        fallback={
+          <div class="text-2xl font-bold text-white mt-[80px] p-24 flex flex-col gap-2 items-center justify-center">
+            <span>Be The First To Start The Conversation.</span>
+            <BiRegularParty class="fill-current text-purple-500/30" size={50} />
+          </div>
+        }
+      >
+        <div class="flex flex-col gap-2 pb-12 mt-[80px]">
+          <Empty sm />
+          <For each={props.messages()}>
+            {(message) => {
+              return (
+                <div
+                  class={`message ${
+                    message.sentBy === props.myId()
+                      ? "bg-purple-500 ml-auto border-purple-700 rounded-bl-lg"
+                      : "border border-solid border-gray-700 mr-auto rounded-br-lg"
+                  } w-fit flex items-center p-3 text-white border border-solid rounded-tl-lg rounded-tr-lg`}
+                >
+                  {message.content}
+                </div>
+              );
+            }}
+          </For>
+          <Empty last />
+        </div>
+      </Show>
+      <div class="w-[80%] bg-[#000] z-[996] md:w-[60%] flex justify-between px-5 text-offwhite font-medium  border border-gray-300 p-3 rounded-lg fixed bottom-6 focus:outline-none">
+        <input
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleMessage();
+            }
           }}
-        </For>
-        <Empty last />
+          value={message()}
+          onInput={(e) => setMessage(e.currentTarget.value)}
+          placeholder="Message"
+          class="w-full placeholder:font-bold caret-purple-500 bg-inherit focus:outline-none"
+        />
+        <button
+          onClick={() => handleMessage()}
+          disabled={!message().length}
+          class="text-purple-500 disabled:text-gray-500"
+        >
+          <AiOutlineSend class="fill-current transition-colors" size={30} />
+        </button>
       </div>
     </div>
   );
 };
 
-interface Contact {
-  img?: string | null;
-  notifications?: number;
-  name?: string | null;
-}
 const AddContact: Component<{
   contacts: Accessor<Array<Contact>>;
   close: () => void;

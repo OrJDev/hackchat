@@ -7,6 +7,7 @@ import {
   createSignal,
   on,
   onCleanup,
+  onMount,
   ParentComponent,
   Setter,
   useContext,
@@ -14,15 +15,108 @@ import {
 import Pusher from "pusher-js";
 import { Contact, Events } from "./events";
 import toast from "solid-toast";
+import { triggerMessage } from "~/server/messages";
+import { wrapWithTry } from "./helpers";
+
+function generateUniqueId(userId: string) {
+  const timestamp = Date.now();
+  return `${userId}-${timestamp}`;
+}
 
 const contactsContext = createContext<{
   contacts: Accessor<Contact[]>;
   setContacts: Setter<Contact[]>;
+  sendMessage: (to: string, content: string) => void;
+  messages: Accessor<Record<string, Message[]>>;
 }>(null!);
 
+export type Message = {
+  content: string;
+  sentAt: Date;
+  sentBy: string;
+  messageId: string;
+};
+
+const messagePreifx = "hack_chat-";
 export const ContactsProvider: ParentComponent = (props) => {
   const auth = useAuth();
   const [contacts, setContacts] = createSignal<Contact[]>([]);
+  const [messages, setMessage] = createSignal<Record<string, Message[]>>({});
+
+  const onSentMessage = () => {
+    const chat = document.querySelector("#chat")!;
+    chat.scrollTop = chat.scrollHeight;
+  };
+
+  const callMessages = triggerMessage();
+
+  onMount(() => {
+    const newMessages: Record<string, Message[]> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(messagePreifx)) {
+        const id = key.split(messagePreifx)[1];
+        if (id) {
+          const value = localStorage.getItem(key);
+          if (value) {
+            newMessages[id] = JSON.parse(value);
+          }
+        }
+      }
+    }
+    setMessage(newMessages);
+  });
+
+  const sendMessage = async (to: string, content: string) => {
+    const messageId = generateUniqueId(to);
+    const currentMessages = messages()[to] ?? [];
+    const newMessages = [
+      ...currentMessages,
+      {
+        content,
+        sentBy: auth.session()?.user.id!,
+        sentAt: new Date(),
+        messageId,
+        temp: true,
+      },
+    ] satisfies (Message & { temp?: boolean })[];
+    setMessage((prev) => ({ ...prev, [to]: newMessages }));
+    onSentMessage();
+    await wrapWithTry(async () => {
+      await callMessages.mutateAsync({ id: to, content, messageId });
+      updateMessages(to, content, messageId);
+    });
+  };
+
+  const updateMessages = (
+    to: string,
+    content: string,
+    messageId: string,
+    notUs?: boolean
+  ) => {
+    const currentMessages = messages()[to] ?? [];
+    const newMessages = notUs
+      ? ([
+          ...currentMessages,
+          {
+            content,
+            sentBy: to,
+            sentAt: new Date(),
+            messageId,
+          },
+        ] satisfies Message[])
+      : currentMessages.map((e) => {
+          if (e.messageId === messageId) {
+            delete (e as any).temp;
+          }
+          return e;
+        });
+    localStorage.setItem(
+      `${messagePreifx}${to}`,
+      JSON.stringify(newMessages.filter((e) => !(e as any).temp))
+    );
+    setMessage((prev) => ({ ...prev, [to]: newMessages }));
+  };
 
   const combinedContacts = createMemo(
     on(
@@ -43,37 +137,45 @@ export const ContactsProvider: ParentComponent = (props) => {
   );
 
   let r = false;
-  createEffect(() => {
-    if (auth.status() !== "loading" && !r) {
-      r = true;
-      const client = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
-        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-      });
-      const name = `${auth.session()?.user.id!}`;
-      const sub = client.subscribe(name);
-      const event = <N extends keyof Events>(
-        name: N,
-        cb: (data: Events[N]) => any
-      ) => {
-        return sub.bind(name, cb);
-      };
+  createEffect(
+    on(auth.session, () => {
+      if (auth.status() === "authenticated" && !r) {
+        r = true;
+        const client = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+          cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+        });
+        const name = `${auth.session()?.user.id!}`;
+        const sub = client.subscribe(name);
+        const event = <N extends keyof Events>(
+          name: N,
+          cb: (data: Events[N]) => any
+        ) => {
+          return sub.bind(name, cb);
+        };
 
-      event("contact_added", (data) => {
-        setContacts((prev) => [{ ...data, notifications: 0 }, ...prev]);
-        toast.success(`You Can Now Chat With ${data.name}`);
-      });
+        event("contact_added", (data) => {
+          setContacts((prev) => [{ ...data, notifications: 0 }, ...prev]);
+          toast.success(`You Can Now Chat With ${data.name}`);
+        });
 
-      onCleanup(() => {
-        client.unsubscribe(name);
-      });
-    }
-  });
+        event("message_sent", (data) => {
+          updateMessages(data.by, data.content, data.messageId, true);
+        });
+
+        onCleanup(() => {
+          client.unsubscribe(name);
+        });
+      }
+    })
+  );
 
   return (
     <contactsContext.Provider
       value={{
         contacts: combinedContacts,
         setContacts,
+        sendMessage,
+        messages,
       }}
     >
       {props.children}
@@ -81,18 +183,20 @@ export const ContactsProvider: ParentComponent = (props) => {
   );
 };
 
-export const useContacts = () => {
+export const useInnerContext = () => {
   const ctx = useContext(contactsContext);
   if (!ctx) {
     throw new Error("useContacts Was Used Incorrectly");
   }
+  return ctx;
+};
+
+export const useContacts = () => {
+  const ctx = useInnerContext();
   return ctx.contacts;
 };
 
 export const alterContacts = () => {
-  const ctx = useContext(contactsContext);
-  if (!ctx) {
-    throw new Error("useContacts Was Used Incorrectly");
-  }
+  const ctx = useInnerContext();
   return ctx.setContacts;
 };
