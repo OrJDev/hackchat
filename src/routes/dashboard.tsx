@@ -39,14 +39,19 @@ const Dashboard: VoidComponent = () => {
       : null
   );
 
-  const messages = createMemo(() => {
-    const s = selectedContact();
-    if (s) {
-      const m = _messages();
-      return m[s.id] ?? [];
-    }
-    return [];
-  });
+  const messages = createMemo(
+    on(
+      () => [selectedContact(), _messages()],
+      () => {
+        const s = selectedContact();
+        if (s) {
+          const m = _messages();
+          return m[s.id] ?? [];
+        }
+        return [];
+      }
+    )
+  );
 
   const isSmall = createMediaQuery("(max-width: 767px)");
 

@@ -77,9 +77,8 @@ export const ContactsProvider: ParentComponent = (props) => {
         sentBy: auth.session()?.user.id!,
         sentAt: new Date(),
         messageId,
-        temp: true,
       },
-    ] satisfies (Message & { temp?: boolean })[];
+    ] satisfies Message[];
     setMessage((prev) => ({ ...prev, [to]: newMessages }));
     onSentMessage();
     await wrapWithTry(async () => {
@@ -105,16 +104,8 @@ export const ContactsProvider: ParentComponent = (props) => {
             messageId,
           },
         ] satisfies Message[])
-      : currentMessages.map((e) => {
-          if (e.messageId === messageId) {
-            delete (e as any).temp;
-          }
-          return e;
-        });
-    localStorage.setItem(
-      `${messagePreifx}${to}`,
-      JSON.stringify(newMessages.filter((e) => !(e as any).temp))
-    );
+      : currentMessages;
+    localStorage.setItem(`${messagePreifx}${to}`, JSON.stringify(newMessages));
     setMessage((prev) => ({ ...prev, [to]: newMessages }));
   };
 
@@ -160,6 +151,7 @@ export const ContactsProvider: ParentComponent = (props) => {
 
         event("message_sent", (data) => {
           updateMessages(data.by, data.content, data.messageId, true);
+          onSentMessage();
         });
 
         onCleanup(() => {
