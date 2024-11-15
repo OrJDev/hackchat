@@ -19,33 +19,29 @@ import { createMediaQuery } from "@solid-primitives/media";
 import { wrapWithTry } from "~/utils/helpers";
 import { isServer } from "solid-js/web";
 import toast from "solid-toast";
-import { RenderUserImage } from "~/components";
+import { LoadingIndicator, RenderUserImage } from "~/components";
 import { Message, useContacts, useInnerContext } from "~/utils/contacts";
 import { AiOutlineSend } from "solid-icons/ai";
 import { Contact } from "~/utils/events";
 import { BiRegularParty } from "solid-icons/bi";
-import { useSearchParams } from "@solidjs/router";
 
 const Dashboard: VoidComponent = () => {
   const contacts = useContacts();
   const auth = useAuth();
   const [addingContact, setAddingContact] = createSignal(false);
-  const [searchParams, setParams] = useSearchParams();
-  const { messages: _messages } = useInnerContext();
+  const innerContext = useInnerContext();
 
   const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
-    searchParams.c
-      ? contacts().find((e) => e.id === searchParams.c) ?? null
-      : null
+    null
   );
 
   const messages = createMemo(
     on(
-      () => [selectedContact(), _messages()],
+      () => [selectedContact(), innerContext.messages()],
       () => {
         const s = selectedContact();
         if (s) {
-          const m = _messages();
+          const m = innerContext.messages();
           return m[s.id] ?? [];
         }
         return [];
@@ -58,21 +54,10 @@ const Dashboard: VoidComponent = () => {
   let chatRef: HTMLDivElement;
 
   createEffect(
-    on(
-      () => [selectedContact(), chatRef],
-      () => {
-        if (chatRef) {
-          chatRef.scrollTop = chatRef.scrollHeight;
-        }
-      }
-    )
-  );
-
-  createEffect(
     on(selectedContact, (s) => {
-      setParams({
-        c: s?.id,
-      });
+      if (s && chatRef) {
+        chatRef.scrollTop = chatRef.scrollHeight;
+      }
     })
   );
 
@@ -174,9 +159,6 @@ const Dashboard: VoidComponent = () => {
               } h-full animate-fadeIn overflow-y-scroll scrollbar`}
             >
               <RenderChat
-                onSentMessage={() => {
-                  chatRef.scrollTop = chatRef.scrollHeight;
-                }}
                 myId={() => auth.session()?.user.id!}
                 messages={messages}
                 isSmall={isSmall}
@@ -214,13 +196,12 @@ const RenderChat: Component<{
   resetContact: () => void;
   contact: Accessor<Contact>;
   myId: Accessor<string>;
-  onSentMessage: () => void;
 }> = (props) => {
   const [message, setMessage] = createSignal("");
-  const { sendMessage } = useInnerContext();
+  const innerContext = useInnerContext();
 
   const handleMessage = () => {
-    sendMessage(props.contact().id, message());
+    innerContext.sendMessage(props.contact().id, message());
     setMessage("");
   };
 
@@ -245,8 +226,19 @@ const RenderChat: Component<{
         when={props.messages().length}
         fallback={
           <div class="text-2xl font-bold text-white mt-[80px] p-24 flex flex-col gap-2 items-center justify-center">
-            <span>Be The First To Start The Conversation.</span>
-            <BiRegularParty class="fill-current text-purple-500/30" size={50} />
+            {innerContext.loading() ? (
+              <div class="flex gap-2 items-center mt-[80px]">
+                Loading... <LoadingIndicator white />
+              </div>
+            ) : (
+              <>
+                <span>Be The First To Start The Conversation.</span>
+                <BiRegularParty
+                  class="fill-current text-purple-500/30"
+                  size={50}
+                />
+              </>
+            )}
           </div>
         }
       >

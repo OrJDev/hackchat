@@ -28,6 +28,7 @@ const contactsContext = createContext<{
   setContacts: Setter<Contact[]>;
   sendMessage: (to: string, content: string) => void;
   messages: Accessor<Record<string, Message[]>>;
+  loading: Accessor<boolean>;
 }>(null!);
 
 export type Message = {
@@ -42,6 +43,7 @@ export const ContactsProvider: ParentComponent = (props) => {
   const auth = useAuth();
   const [contacts, setContacts] = createSignal<Contact[]>([]);
   const [messages, setMessage] = createSignal<Record<string, Message[]>>({});
+  const [loading, setLoading] = createSignal(true);
 
   const onSentMessage = () => {
     const chat = document.querySelector("#chat")!;
@@ -65,6 +67,7 @@ export const ContactsProvider: ParentComponent = (props) => {
       }
     }
     setMessage(newMessages);
+    setLoading(false);
   });
 
   const sendMessage = async (to: string, content: string) => {
@@ -168,6 +171,7 @@ export const ContactsProvider: ParentComponent = (props) => {
         setContacts,
         sendMessage,
         messages,
+        loading,
       }}
     >
       {props.children}
