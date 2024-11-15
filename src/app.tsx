@@ -18,7 +18,7 @@ export default function App() {
         <MetaProvider>
           <Meta
             name="viewport"
-            content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
           />
           <Meta name="theme-color" content="#a855f7" />
           <Title>HackChat</Title>

@@ -18,7 +18,7 @@
 }
 
 .scrollbar {
-  touch-action: manipulation !important; /* Re-enables touch interactions */
+  touch-action: auto !important; /* Re-enables touch interactions */
 }
 
 ::-webkit-scrollbar:not(.scrollbar) {
@@ -29,8 +29,4 @@ html {
   overflow-y: hidden !important;
   touch-action: none !important; /* Disables touch-based interactions */
   -ms-touch-action: none !important; /* For older IE/Edge versions */
-}
-
-:root {
-  touch-action: manipulation;
 }
