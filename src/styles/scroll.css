@@ -18,7 +18,7 @@
 }
 
 .scrollbar {
-  touch-action: auto !important; /* Re-enables touch interactions */
+  touch-action: manipulation !important; /* Re-enables touch interactions */
 }
 
 ::-webkit-scrollbar:not(.scrollbar) {
