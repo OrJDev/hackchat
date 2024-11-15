@@ -96,7 +96,7 @@ const Dashboard: VoidComponent = () => {
             <Show
               when={contacts().length}
               fallback={
-                <div class="flex flex-col gap-5 items-center text-center">
+                <div class="flex flex-col gap-5 items-center text-center mt-[80px]">
                   <span class="font-bold text-white">No Contacts?</span>
                   <FaSolidArrowDown color="white" size={30} />
                   <div class="text-offwhite text-sm font-medium ">
@@ -118,7 +118,7 @@ const Dashboard: VoidComponent = () => {
                 </div>
               }
             >
-              <ul class="flex flex-col gap-1 mt-2 pb-24">
+              <ul class="flex flex-col gap-1 mt-[80px] pb-24">
                 <For each={contacts()}>
                   {(contact) => {
                     return (
