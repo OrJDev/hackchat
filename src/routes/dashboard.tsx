@@ -1,6 +1,6 @@
 import "~/styles/scroll.css";
 import { useAuth } from "@solid-mediakit/auth/client";
-import { Title } from "@solidjs/meta";
+import { Meta, Title } from "@solidjs/meta";
 import { FaSolidArrowDown, FaSolidPlus } from "solid-icons/fa";
 import {
   Accessor,
@@ -76,7 +76,11 @@ const Dashboard: VoidComponent = () => {
   return (
     <>
       <Title>HackChat - Dashboard</Title>
-      <main class="grid grid-cols-3 h-screen w-full">
+      <Meta
+        name="viewport"
+        content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi"
+      />
+      <main class="grid grid-cols-3 h-[calc(100vh-theme(space.24))] w-full">
         <Show when={!isSmall() || !selectedContact()}>
           <div
             class={`col-span-1 ${

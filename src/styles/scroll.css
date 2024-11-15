@@ -30,3 +30,7 @@ html {
   touch-action: none !important; /* Disables touch-based interactions */
   -ms-touch-action: none !important; /* For older IE/Edge versions */
 }
+
+:root {
+  touch-action: manipulation;
+}
