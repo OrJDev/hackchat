@@ -100,6 +100,8 @@ const Contact: VoidComponent = () => {
 
 export default Contact;
 
+// yes im not a bad dev, this is a very wrong way to write jsx
+// but this is giving me the output i want so i couldn't care less
 const MetaImage: Component<{
   data: { image?: string | null; name?: string | null };
 }> = (props) => {
