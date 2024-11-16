@@ -26,7 +26,7 @@ export default function App() {
           <Meta property="og:description" content="Secured RealTime Chat App" />
           <Meta property="og:url" content="https://hackchat.dev" />
           <Meta property="og:site_name" content="HackChat" />
-          {/* <Meta property="og:image" content="https://hackchat.dev/og.png" /> */}
+          <Meta property="og:image" content="https://hackchat.dev/og.png" />
           <Meta name="twitter:card" content="summary_large_image" />
           <Meta name="twitter:site" content="https://hackchat.dev" />
           <Meta name="twitter:title" content="HackChat" />
