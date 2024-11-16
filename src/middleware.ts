@@ -7,7 +7,7 @@ const paths = {
   "/": false,
   "/dashboard": true,
   "/auth": null,
-  "/contact": true,
+  "/contact": false,
 } satisfies Record<string, boolean | null>;
 
 export default createMiddleware({

@@ -7,7 +7,7 @@ import { trigger } from "../pusher";
 export const getContactLink = createCaller(
   z.object({ id: z.string() }),
   async ({ input$, session$ }) => {
-    if (input$.id === session$.user.id) {
+    if (input$.id === session$?.user.id) {
       return error$("You can't accept your own requests");
     }
     const user = await prisma.user.findUnique({
@@ -24,8 +24,7 @@ export const getContactLink = createCaller(
       return error$("No Such Invitation Link");
     }
     return user;
-  },
-  { protected: true }
+  }
 );
 
 export const acceptContact = createCaller(

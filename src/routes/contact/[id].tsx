@@ -1,5 +1,5 @@
 import { Title } from "@solidjs/meta";
-import { useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { Component, Show, VoidComponent } from "solid-js";
 import toast from "solid-toast";
 import { RenderPRPCData, RenderUserImage } from "~/components";
@@ -8,11 +8,12 @@ import { alterContacts } from "~/utils/contacts";
 import { wrapWithTry } from "~/utils/helpers";
 import { DynamicImage, OpenGraph } from "@solid-mediakit/og";
 import { getUrl } from "~/utils/url";
+import { useAuth } from "@solid-mediakit/auth/client";
 
 const Contact: VoidComponent = () => {
   const params = useParams<{ id: string }>();
   const link = getContactLink(() => ({ id: params.id }));
-
+  const auth = useAuth();
   const acceptLink = acceptContact();
 
   const disabled = () => !params.id || acceptLink.isPending;
@@ -40,58 +41,84 @@ const Contact: VoidComponent = () => {
             </div>
           </div>
           <div class="w-[90%] -mt-4 bg-gray-500 rounded-lg h-[0.2px] self-center" />
-          <span class="font-bold mt-4 text-lg sm:text-xl text-offwhite">
-            Do You Want To Accept His Request?
-          </span>
-          <div class="flex gap-2 items-center justify-center w-full">
-            <button
-              disabled={disabled()}
-              onClick={() =>
-                void wrapWithTry(() =>
-                  acceptLink.mutateAsync({ id: params.id }).then(() => {
-                    toast.success(`${link.data?.name} Is Now In Your Contacts`);
-                    setContacts((prev) => [
-                      {
-                        img: link.data?.image,
-                        name: link.data?.name,
-                        id: link.data?.id as string,
-                        online: null,
-                      },
-                      ...prev,
-                    ]);
-                    // navigate("/dashboard");
-                    // refetch watchlist
-                    window.location.href = "/dashboard";
-                  })
-                )
-              }
-              class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-green-500 font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
-              style={{
-                "box-shadow": `0 0 0 1px #555`,
-              }}
-            >
-              Yes
-            </button>
-            <div class="h-[50px] w-[0.5px] rounded-lg bg-gray-400" />
-            <button
-              onClick={() => {
-                toast.success("You Can Change Your Mind Anytime");
-                navigate("/dashboard");
-              }}
-              disabled={disabled()}
-              class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-red-500 font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
-              style={{
-                "box-shadow": `0 0 0 1px #555`,
-              }}
-            >
-              No
-            </button>
-          </div>
-          <p class="text-offwhite font-medium max-w-[300px] sm:max-w-[400px] text-center">
-            By accepting {link.data?.name}'s request, he will be able to send
-            you messages, you can also ignore this request for now and accept it
-            later.
-          </p>
+          <Show
+            when={auth.session()}
+            fallback={
+              <>
+                <span class="font-bold mt-4 text-lg max-w-[400px] text-center sm:text-xl text-offwhite">
+                  If you want to join{" "}
+                  <strong class="text-purple-500 font-bold">
+                    {link.data?.name}
+                  </strong>{" "}
+                  and many other people on this platform, you need to login.
+                </span>
+                <A
+                  href="/auth"
+                  class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-white font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
+                  style={{
+                    "box-shadow": `0 0 0 1px #555`,
+                  }}
+                >
+                  Login
+                </A>
+              </>
+            }
+          >
+            <span class="font-bold mt-4 text-lg sm:text-xl text-offwhite">
+              Do You Want To Accept His Request?
+            </span>
+            <div class="flex gap-2 items-center justify-center w-full">
+              <button
+                disabled={disabled()}
+                onClick={() =>
+                  void wrapWithTry(() =>
+                    acceptLink.mutateAsync({ id: params.id }).then(() => {
+                      toast.success(
+                        `${link.data?.name} Is Now In Your Contacts`
+                      );
+                      setContacts((prev) => [
+                        {
+                          img: link.data?.image,
+                          name: link.data?.name,
+                          id: link.data?.id as string,
+                          online: null,
+                        },
+                        ...prev,
+                      ]);
+                      // navigate("/dashboard");
+                      // refetch watchlist
+                      window.location.href = "/dashboard";
+                    })
+                  )
+                }
+                class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-green-500 font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
+                style={{
+                  "box-shadow": `0 0 0 1px #555`,
+                }}
+              >
+                Yes
+              </button>
+              <div class="h-[50px] w-[0.5px] rounded-lg bg-gray-400" />
+              <button
+                onClick={() => {
+                  toast.success("You Can Change Your Mind Anytime");
+                  navigate("/dashboard");
+                }}
+                disabled={disabled()}
+                class="disabled:animate-pulse hover:bg-zinc-700 disabled:bg-opacity-50 text-red-500 font-bold transition-all text-sm w-28 h-12 rounded-lg p-3 flex items-center justify-center"
+                style={{
+                  "box-shadow": `0 0 0 1px #555`,
+                }}
+              >
+                No
+              </button>
+            </div>
+            <p class="text-offwhite font-medium max-w-[300px] sm:max-w-[400px] text-center">
+              By accepting {link.data?.name}'s request, he will be able to send
+              you messages, you can also ignore this request for now and accept
+              it later.
+            </p>
+          </Show>
         </RenderPRPCData>
       </main>
     </>
