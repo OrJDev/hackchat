@@ -20,12 +20,13 @@ export default function App() {
             name="viewport"
             content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
           />
+          <Meta name="theme-color" content="#a855f7" />
+          <Meta name="description" content="Secured RealTime Chat App" />
           <Meta property="og:title" content="HackChat" />
           <Meta property="og:description" content="Secured RealTime Chat App" />
           <Meta property="og:url" content="https://hackchat.dev" />
           <Meta property="og:site_name" content="HackChat" />
           <Meta property="og:image" content="https://hackchat.dev/og.png" />
-
           <Meta name="twitter:card" content="summary_large_image" />
           <Meta name="twitter:site" content="https://hackchat.dev" />
           <Meta name="twitter:title" content="HackChat" />
@@ -35,7 +36,6 @@ export default function App() {
           />
           <Meta name="twitter:image" content="https://hackchat.dev/og.png" />
 
-          <Meta name="theme-color" content="#a855f7" />
           <Title>HackChat</Title>
           <SessionProvider>
             <QueryClientProvider client={queryClient}>
