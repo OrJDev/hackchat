@@ -1,11 +1,13 @@
 import { Title } from "@solidjs/meta";
 import { useNavigate, useParams } from "@solidjs/router";
-import { VoidComponent } from "solid-js";
+import { Component, Show, VoidComponent } from "solid-js";
 import toast from "solid-toast";
 import { RenderPRPCData, RenderUserImage } from "~/components";
 import { acceptContact, getContactLink } from "~/server/contacts";
 import { alterContacts } from "~/utils/contacts";
 import { wrapWithTry } from "~/utils/helpers";
+import { DynamicImage, OpenGraph } from "@solid-mediakit/og";
+import { getUrl } from "~/utils/url";
 
 const Contact: VoidComponent = () => {
   const params = useParams<{ id: string }>();
@@ -21,6 +23,9 @@ const Contact: VoidComponent = () => {
   return (
     <>
       <Title>HackChat - Accept Contact</Title>
+      <Show when={link.data}>
+        <MetaImage data={link.data!} />
+      </Show>
       <main class="flex flex-col gap-5 w-full h-full items-center">
         <RenderPRPCData data={link.data} error={link.error}>
           <div class="w-full flex gap-2 items-center justify-center px-3 py-1 sm:py-3 sm:px-12">
@@ -50,10 +55,13 @@ const Contact: VoidComponent = () => {
                         img: link.data?.image,
                         name: link.data?.name,
                         id: link.data?.id as string,
+                        online: null,
                       },
                       ...prev,
                     ]);
-                    navigate("/dashboard");
+                    // navigate("/dashboard");
+                    // refetch watchlist
+                    window.location.href = "/dashboard";
                   })
                 )
               }
@@ -91,3 +99,83 @@ const Contact: VoidComponent = () => {
 };
 
 export default Contact;
+
+const MetaImage: Component<{
+  data: { image?: string | null; name?: string | null };
+}> = (props) => {
+  return (
+    <OpenGraph origin={getUrl()}>
+      <DynamicImage>
+        <div
+          style={{
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            "flex-direction": "column",
+            "align-items": "center",
+            "justify-content": "center",
+            "background-color": "#000",
+            "font-size": "32",
+          }}
+        >
+          <img
+            referrerpolicy="no-referrer"
+            src={props.data?.image!}
+            style={{
+              height: "150",
+              width: "150",
+              "border-radius": "150",
+              "margin-top": "20",
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              "flex-direction": "row",
+              width: "100%",
+              gap: "8",
+              "margin-top": "",
+              "align-items": "center",
+              "justify-content": "center",
+              "font-weight": "bold",
+            }}
+          >
+            <h1
+              style={{
+                color: "#a855f7",
+                "text-decoration-style": "dotted",
+                "text-decoration-line": "underline",
+                "text-decoration-color": "white",
+                "font-weight": "bold",
+                "font-size": "50",
+              }}
+            >
+              Add
+            </h1>
+            <span
+              style={{
+                color: "white",
+                "text-decoration-style": "dotted",
+                "text-decoration-line": "underline",
+                "text-decoration-color": "white",
+                "font-weight": "bold",
+                "font-size": "50",
+              }}
+            >
+              {props.data?.name}
+            </span>
+          </div>
+          <span
+            style={{
+              "font-weight": "400",
+              color: "white",
+              "margin-top": "-20px",
+            }}
+          >
+            On HackChat
+          </span>
+        </div>
+      </DynamicImage>
+    </OpenGraph>
+  );
+};

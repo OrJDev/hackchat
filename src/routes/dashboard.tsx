@@ -24,6 +24,7 @@ import { Message, useContacts, useInnerContext } from "~/utils/contacts";
 import { AiOutlineSend } from "solid-icons/ai";
 import { Contact } from "~/utils/events";
 import { BiRegularParty } from "solid-icons/bi";
+import { IoMailUnreadOutline } from "solid-icons/io";
 
 const Dashboard: VoidComponent = () => {
   const contacts = useContacts();
@@ -31,15 +32,11 @@ const Dashboard: VoidComponent = () => {
   const [addingContact, setAddingContact] = createSignal(false);
   const innerContext = useInnerContext();
 
-  const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
-    null
-  );
-
   const messages = createMemo(
     on(
-      () => [selectedContact(), innerContext.messages()],
+      () => [innerContext.selectedContact(), innerContext.messages()],
       () => {
-        const s = selectedContact();
+        const s = innerContext.selectedContact();
         if (s) {
           const m = innerContext.messages();
           return m[s.id] ?? [];
@@ -54,7 +51,7 @@ const Dashboard: VoidComponent = () => {
   let chatRef: HTMLDivElement;
 
   createEffect(
-    on(selectedContact, (s) => {
+    on(innerContext.selectedContact, (s) => {
       if (s && chatRef) {
         chatRef.scrollTop = chatRef.scrollHeight;
       }
@@ -63,11 +60,11 @@ const Dashboard: VoidComponent = () => {
 
   createEffect(
     on(
-      () => [selectedContact(), innerContext.status()] as const,
+      () => [innerContext.selectedContact(), innerContext.status()] as const,
       ([c, s]) => {
         if (c && s[c.id] === false) {
           toast.error(`${c.name} Went Offline`);
-          setSelectedContact(null);
+          innerContext.setSelectedContact(null);
         }
       }
     )
@@ -77,7 +74,7 @@ const Dashboard: VoidComponent = () => {
     <>
       <Title>HackChat - Dashboard</Title>
       <main class="grid grid-cols-3 h-[calc(100vh-theme(space.24))] w-full">
-        <Show when={!isSmall() || !selectedContact()}>
+        <Show when={!isSmall() || !innerContext.selectedContact()}>
           <div
             class={`col-span-1 ${
               isSmall() ? "w-screen" : ""
@@ -87,11 +84,11 @@ const Dashboard: VoidComponent = () => {
               <div class="flex items-center  justify-between w-full relative top-1/2 -translate-y-1/2">
                 <h2
                   class={`text-xl font-bold ${
-                    selectedContact() ? "text-purple-400" : ""
+                    innerContext.selectedContact() ? "text-purple-400" : ""
                   }`}
                 >
-                  {selectedContact()
-                    ? selectedContact()?.name
+                  {innerContext.selectedContact()
+                    ? innerContext.selectedContact()?.name
                     : "Your Contacts"}
                 </h2>
 
@@ -140,7 +137,7 @@ const Dashboard: VoidComponent = () => {
                     return (
                       <RenderContact
                         contact={contact}
-                        onClick={() => setSelectedContact(contact)}
+                        onClick={() => innerContext.setSelectedContact(contact)}
                       />
                     );
                   }}
@@ -151,7 +148,7 @@ const Dashboard: VoidComponent = () => {
           </div>
         </Show>
         <Show
-          when={selectedContact()}
+          when={innerContext.selectedContact()}
           fallback={
             isSmall() ? null : (
               <div class="h-full w-full flex items-center flex-col gap-2 mt-[80px]">
@@ -174,7 +171,7 @@ const Dashboard: VoidComponent = () => {
                 myId={() => auth.session()?.user.id!}
                 messages={messages}
                 isSmall={isSmall}
-                resetContact={() => setSelectedContact(null)}
+                resetContact={() => innerContext.resetMessages()}
                 contact={contact}
               />
             </div>
@@ -269,9 +266,16 @@ const RenderChat: Component<{
                     message.sentBy === props.myId()
                       ? "bg-purple-500 ml-auto border-purple-700 rounded-bl-lg"
                       : "border border-solid border-gray-700 mr-auto rounded-br-lg"
-                  } w-fit flex items-center p-3 text-white border border-solid rounded-tl-lg rounded-tr-lg`}
+                  }  w-fit relative flex items-center p-3 text-white border border-solid rounded-tl-lg rounded-tr-lg`}
                 >
-                  {message.content}
+                  {message.content}{" "}
+                  {message.isNew ? (
+                    <IoMailUnreadOutline
+                      class="absolute right-2 top-1"
+                      size={12}
+                      color="gray"
+                    />
+                  ) : null}
                 </div>
               );
             }}
@@ -399,6 +403,7 @@ const RenderContact: Component<{
   modal?: boolean;
   onClick?: () => any;
 }> = (props) => {
+  const innerContext = useInnerContext();
   return (
     <button
       onClick={() => {
@@ -425,23 +430,34 @@ const RenderContact: Component<{
       >
         {props.contact.name}
       </span>
-      {props.contact.online === null ? (
-        <div class="absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center">
-          <LoadingIndicator />
-        </div>
-      ) : (
-        <div
-          class={`absolute animate-fadeIn top-1/2 -translate-y-1/2 right-2 border border-solid ${
-            props.contact.online ? "border-green-500" : "border-red-500"
-          } rounded-full w-8 h-8 flex items-center justify-center `}
-        >
+
+      <div class="absolute top-1/2 -translate-y-1/2 right-2 flex items-center justify-center gap-2">
+        <Show when={innerContext.getNotifs(props.contact.id)}>
+          <div class="flex gap-2 animate-fadeIn items-center justify-center w-[50px]">
+            <span class="text-offwhite text-xl">
+              {innerContext.getNotifs(props.contact.id)}
+            </span>
+            <IoMailUnreadOutline size={20} color="white" />
+          </div>
+        </Show>
+        {props.contact.online === null ? (
+          <div class="flex items-center justify-center">
+            <LoadingIndicator />
+          </div>
+        ) : (
           <div
-            class={`h-[70%] w-[70%] rounded-full ${
-              props.contact.online ? "bg-green-300" : "bg-red-300"
-            }`}
-          />
-        </div>
-      )}
+            class={` animate-fadeIn border border-solid ${
+              props.contact.online ? "border-green-500" : "border-red-500"
+            } rounded-full w-8 h-8 flex items-center justify-center `}
+          >
+            <div
+              class={`h-[70%] w-[70%] rounded-full ${
+                props.contact.online ? "bg-green-300" : "bg-red-300"
+              }`}
+            />
+          </div>
+        )}
+      </div>
     </button>
   );
 };

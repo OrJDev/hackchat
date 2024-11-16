@@ -31,6 +31,10 @@ const contactsContext = createContext<{
   messages: Accessor<Record<string, Message[]>>;
   loading: Accessor<boolean>;
   status: Accessor<Record<string, boolean | null>>;
+  selectedContact: Accessor<Contact | null>;
+  setSelectedContact: Setter<Contact | null>;
+  resetMessages: () => void;
+  getNotifs: (id: string) => number;
 }>(null!);
 
 export type Message = {
@@ -38,6 +42,8 @@ export type Message = {
   sentAt: Date;
   sentBy: string;
   messageId: string;
+
+  isNew?: boolean;
 };
 
 const messagePreifx = "hack_chat-";
@@ -46,10 +52,24 @@ export const ContactsProvider: ParentComponent = (props) => {
   const [contacts, setContacts] = createSignal<Contact[]>([]);
   const [messages, setMessage] = createSignal<Record<string, Message[]>>({});
   const [loading, setLoading] = createSignal(true);
+  const [selectedContact, setSelectedContact] = createSignal<Contact | null>(
+    null
+  );
+  const [noficiations, setNotifications] = createSignal<Record<string, number>>(
+    {}
+  );
 
-  const onSentMessage = () => {
-    const chat = document.querySelector("#chat")!;
-    chat.scrollTop = chat.scrollHeight;
+  const onSentMessage = (contact?: Contact) => {
+    if (!contact || contact.id === selectedContact()?.id) {
+      const chat = document.querySelector("#chat")!;
+      chat.scrollTop = chat.scrollHeight;
+    } else {
+      setNotifications((prev) => ({
+        ...prev,
+        [contact.id]: (prev[contact.id] ?? 0) + 1,
+      }));
+      toast.success(`You received a message from ${contact.name}`);
+    }
   };
 
   const callMessages = triggerMessage();
@@ -96,7 +116,8 @@ export const ContactsProvider: ParentComponent = (props) => {
     to: string,
     content: string,
     messageId: string,
-    notUs?: boolean
+    notUs?: boolean,
+    isNew?: boolean
   ) => {
     const currentMessages = messages()[to] ?? [];
     const newMessages = notUs
@@ -107,10 +128,21 @@ export const ContactsProvider: ParentComponent = (props) => {
             sentBy: to,
             sentAt: new Date(),
             messageId,
+            isNew,
           },
         ] satisfies Message[])
       : currentMessages;
-    localStorage.setItem(`${messagePreifx}${to}`, JSON.stringify(newMessages));
+
+    localStorage.setItem(
+      `${messagePreifx}${to}`,
+      JSON.stringify(
+        newMessages.map((_e) => {
+          const e = { ..._e };
+          delete e.isNew;
+          return e;
+        })
+      )
+    );
     setMessage((prev) => ({ ...prev, [to]: newMessages }));
   };
 
@@ -192,8 +224,17 @@ export const ContactsProvider: ParentComponent = (props) => {
         });
 
         event("message_sent", (data) => {
-          updateMessages(data.by, data.content, data.messageId, true);
-          onSentMessage();
+          const contact = combinedContacts().find((e) => e.id === data.by);
+          if (contact) {
+            updateMessages(
+              data.by,
+              data.content,
+              data.messageId,
+              true,
+              contact.id !== selectedContact()?.id
+            );
+            onSentMessage(contact);
+          }
         });
 
         onCleanup(() => {
@@ -202,6 +243,25 @@ export const ContactsProvider: ParentComponent = (props) => {
       }
     })
   );
+  const resetMessages = () => {
+    const s = selectedContact();
+    if (s) {
+      setSelectedContact(null);
+      setMessage((prev) => ({
+        ...prev,
+        [s.id]: prev[s.id].map((e) => {
+          if (e.isNew) {
+            e.isNew = false;
+          }
+          return e;
+        }),
+      }));
+      setNotifications((prev) => ({
+        ...prev,
+        [s.id]: 0,
+      }));
+    }
+  };
 
   return (
     <contactsContext.Provider
@@ -212,6 +272,10 @@ export const ContactsProvider: ParentComponent = (props) => {
         messages,
         loading,
         status,
+        selectedContact,
+        setSelectedContact,
+        resetMessages,
+        getNotifs: (id: string) => noficiations()[id] ?? 0,
       }}
     >
       {props.children}
