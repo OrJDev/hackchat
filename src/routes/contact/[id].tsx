@@ -30,7 +30,7 @@ const Contact: VoidComponent = () => {
 
   return (
     <>
-      <Title>HackChat - Accept Contact</Title>
+      <Title>HackChat - Contact Profile</Title>
       <div class="text-lg font-bold text-red-500">
         <Show when={link.data}>
           {(data) => (
@@ -43,7 +43,7 @@ const Contact: VoidComponent = () => {
         </Show>
       </div>
       <main class="flex flex-col gap-5 w-full h-full items-center">
-        <RenderPRPCData data={link.data} error={link.error}>
+        <RenderPRPCData data={link.data} error={() => link.error}>
           <div class="w-full flex gap-2 items-center justify-center px-3 py-1 sm:py-3 sm:px-12">
             <RenderUserImage sm img={link.data?.image} name={link.data?.name} />
             <div class="text-offwhite text-sm sm:text-xl font-bold">

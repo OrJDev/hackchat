@@ -1,15 +1,15 @@
 import type { PRPClientError } from "@solid-mediakit/prpc";
 import { A } from "@solidjs/router";
-import { ParentComponent, Show, type JSXElement } from "solid-js";
+import { Accessor, ParentComponent, Show, type JSXElement } from "solid-js";
 
 export const RenderPRPCData = <T extends object>(props: {
   data: T | undefined | { error: string };
-  error?: PRPClientError<any> | null;
+  error?: Accessor<PRPClientError<any> | null | undefined>;
   children: JSXElement;
 }) => {
   return (
     <Show
-      when={props.data && (props.error || "error" in props.data)}
+      when={props.data || props.error?.()}
       fallback={<RenderChildren children={props.children} />}
     >
       <>
@@ -17,8 +17,8 @@ export const RenderPRPCData = <T extends object>(props: {
           <p>
             {props.data && "error" in props.data
               ? props.data.error
-              : props.error?.message
-              ? props.error.message
+              : props.error?.()?.message
+              ? props.error?.()?.message
               : "Something Went Wrong"}
           </p>
         </div>
