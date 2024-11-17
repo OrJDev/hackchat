@@ -13,7 +13,6 @@ const config = withPRPC(
       optimizeDeps: {
         exclude: ["solid-icons"],
       },
-      plugins: [OGPlugin()],
     },
     server: {
       preset: "vercel",

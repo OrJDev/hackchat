@@ -1,18 +1,12 @@
-import { Meta, Title } from "@solidjs/meta";
+import { Title } from "@solidjs/meta";
 import { A, useNavigate, useParams } from "@solidjs/router";
-import { Accessor, JSXElement, Show, VoidComponent } from "solid-js";
+import { Show, VoidComponent } from "solid-js";
 import toast from "solid-toast";
 import { RenderPRPCData, RenderUserImage } from "~/components";
 import { acceptContact, getContactLink } from "~/server/contacts";
 import { alterContacts } from "~/utils/contacts";
 import { wrapWithTry } from "~/utils/helpers";
-import { DynamicImage } from "@solid-mediakit/og";
-import { getUrl } from "~/utils/url";
 import { useAuth } from "@solid-mediakit/auth/client";
-
-const urlFromImage = (c: () => JSXElement): Accessor<Accessor<string>> => {
-  return c as any;
-};
 
 const Contact: VoidComponent = () => {
   const params = useParams<{ id: string }>();
@@ -30,97 +24,9 @@ const Contact: VoidComponent = () => {
 
   const setContacts = alterContacts();
 
-  const MetaImage = () => {
-    return (
-      <DynamicImage>
-        <div
-          style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            "flex-direction": "column",
-            "align-items": "center",
-            "justify-content": "center",
-            "background-color": "#000",
-            "font-size": "32",
-          }}
-        >
-          <img
-            referrerpolicy="no-referrer"
-            src={link.data?.image!}
-            srcset={link.data?.image!}
-            style={{
-              height: "150",
-              width: "150",
-              "border-radius": "150",
-              "margin-top": "20",
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              "flex-direction": "row",
-              width: "100%",
-              gap: "8",
-              "margin-top": "",
-              "align-items": "center",
-              "justify-content": "center",
-              "font-weight": "bold",
-            }}
-          >
-            <h1
-              style={{
-                color: "#a855f7",
-                "text-decoration-style": "dotted",
-                "text-decoration-line": "underline",
-                "text-decoration-color": "white",
-                "font-weight": "bold",
-                "font-size": "50",
-              }}
-            >
-              Add
-            </h1>
-            <span
-              style={{
-                color: "white",
-                "text-decoration-style": "dotted",
-                "text-decoration-line": "underline",
-                "text-decoration-color": "white",
-                "font-weight": "bold",
-                "font-size": "50",
-              }}
-            >
-              {link.data?.name}
-            </span>
-          </div>
-          <span
-            style={{
-              "font-weight": "400",
-              color: "white",
-              "margin-top": "-20px",
-            }}
-          >
-            On HackChat
-          </span>
-        </div>
-      </DynamicImage>
-    );
-  };
-  const asUrl = urlFromImage(() => <MetaImage />);
-
-  const RenderTags = () => {
-    return (
-      <>
-        <Meta property="og:image" content={`${getUrl()}${asUrl()()}`} />
-        <Meta name="twitter:image" content={`${getUrl()}${asUrl()()}`} />
-      </>
-    );
-  };
-
   return (
     <>
       <Title>HackChat - Contact Profile</Title>
-      <RenderTags />
       <main class="flex flex-col gap-5 w-full h-full items-center">
         <RenderPRPCData data={link.data} error={() => link.error}>
           <div class="w-full flex gap-2 items-center justify-center px-3 py-1 sm:py-3 sm:px-12">
