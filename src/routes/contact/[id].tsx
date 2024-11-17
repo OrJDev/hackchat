@@ -13,7 +13,7 @@ import { RenderPRPCData, RenderUserImage } from "~/components";
 import { acceptContact, getContactLink } from "~/server/contacts";
 import { alterContacts } from "~/utils/contacts";
 import { wrapWithTry } from "~/utils/helpers";
-import { DynamicImage } from "@solid-mediakit/og";
+import { DynamicImage, OpenGraph } from "@solid-mediakit/og";
 import { getUrl } from "~/utils/url";
 import { useAuth } from "@solid-mediakit/auth/client";
 
@@ -37,9 +37,9 @@ const Contact: VoidComponent = () => {
     <>
       <Title>HackChat - Contact Profile</Title>
       <div class="text-lg font-bold text-red-500">
-        <RenderTags>
+        <OpenGraph origin={getUrl()}>
           <MetaImage data={link.data!} />
-        </RenderTags>
+        </OpenGraph>
       </div>
       <main class="flex flex-col gap-5 w-full h-full items-center">
         <RenderPRPCData data={link.data} error={() => link.error}>
@@ -222,7 +222,7 @@ const MetaImage: Component<{
   );
 };
 
-const RenderTags: Component<{ children: JSXElement }> = (props) => {
+export const RenderTags: Component<{ children: JSXElement }> = (props) => {
   const child = children(() => props.children);
   const url = createMemo(() => getUrl() + child()?.toString());
   return (

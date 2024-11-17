@@ -33,8 +33,8 @@ export default function App() {
             name="twitter:description"
             content="Secured RealTime Chat App"
           />
-          {/* <Meta property="og:image" content="https://hackchat.dev/og.png" />
-          <Meta name="twitter:image" content="https://hackchat.dev/og.png" /> */}
+          <Meta property="og:image" content="https://hackchat.dev/og.png" />
+          <Meta name="twitter:image" content="https://hackchat.dev/og.png" />
 
           <Title>HackChat</Title>
           <SessionProvider>
