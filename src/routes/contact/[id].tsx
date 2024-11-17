@@ -32,15 +32,9 @@ const Contact: VoidComponent = () => {
     <>
       <Title>HackChat - Contact Profile</Title>
       <div class="text-lg font-bold text-red-500">
-        <Show when={link.data}>
-          {(data) => (
-            <>
-              <RenderTags>
-                <MetaImage data={data()} />
-              </RenderTags>
-            </>
-          )}
-        </Show>
+        <RenderTags>
+          <MetaImage data={link.data!} />
+        </RenderTags>
       </div>
       <main class="flex flex-col gap-5 w-full h-full items-center">
         <RenderPRPCData data={link.data} error={() => link.error}>
