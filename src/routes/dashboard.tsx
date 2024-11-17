@@ -451,8 +451,8 @@ const RenderContact: Component<{
             } rounded-full w-8 h-8 flex items-center justify-center `}
           >
             <div
-              class={`h-[70%] w-[70%] rounded-full ${
-                props.contact.online ? "bg-green-300" : "bg-red-300"
+              class={`h-[40%] w-[40%] rounded-full ${
+                props.contact.online ? "bg-green-500" : "bg-red-500"
               }`}
             />
           </div>

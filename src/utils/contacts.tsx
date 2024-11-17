@@ -117,7 +117,8 @@ export const ContactsProvider: ParentComponent = (props) => {
     content: string,
     messageId: string,
     notUs?: boolean,
-    isNew?: boolean
+    isNew?: boolean,
+    removeNews?: boolean
   ) => {
     const currentMessages = messages()[to] ?? [];
     const newMessages = notUs
@@ -136,11 +137,13 @@ export const ContactsProvider: ParentComponent = (props) => {
     localStorage.setItem(
       `${messagePreifx}${to}`,
       JSON.stringify(
-        newMessages.map((_e) => {
-          const e = { ..._e };
-          delete e.isNew;
-          return e;
-        })
+        removeNews
+          ? newMessages.map((_e) => {
+              const e = { ..._e };
+              delete e.isNew;
+              return e;
+            })
+          : newMessages
       )
     );
     setMessage((prev) => ({ ...prev, [to]: newMessages }));
@@ -247,15 +250,23 @@ export const ContactsProvider: ParentComponent = (props) => {
     const s = selectedContact();
     if (s) {
       setSelectedContact(null);
-      setMessage((prev) => ({
-        ...prev,
-        [s.id]: prev[s.id].map((e) => {
-          if (e.isNew) {
-            e.isNew = false;
-          }
-          return e;
-        }),
-      }));
+      setMessage((prev) => {
+        const newMessages = {
+          ...prev,
+          [s.id]: prev[s.id].map((e) => {
+            if (e.isNew) {
+              e.isNew = false;
+            }
+            return e;
+          }),
+        };
+        localStorage.setItem(
+          `${messagePreifx}${s.id}`,
+          JSON.stringify(newMessages)
+        );
+        return newMessages;
+      });
+
       setNotifications((prev) => ({
         ...prev,
         [s.id]: 0,
