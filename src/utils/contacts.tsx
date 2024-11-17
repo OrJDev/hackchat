@@ -84,6 +84,10 @@ export const ContactsProvider: ParentComponent = (props) => {
           const value = localStorage.getItem(key);
           if (value) {
             newMessages[id] = JSON.parse(value);
+            const notifs = newMessages[id].filter((e) => e.isNew).length;
+            if (notifs) {
+              setNotifications((prev) => ({ ...prev, [id]: notifs }));
+            }
           }
         }
       }
