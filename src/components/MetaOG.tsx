@@ -1,6 +1,5 @@
 // @ts-expect-error no typing
 import { createOpenGraphImage } from "@solid-mediakit/og/server";
-import { createMemo } from "solid-js";
 import { getUrl } from "~/utils/url";
 
 const DynamicImage1 = (props: any) => {
@@ -19,20 +18,18 @@ const DynamicImage1 = (props: any) => {
       </div>
     );
   };
-  return createMemo(() => {
-    return (
-      getUrl() +
-      (img as any).url.replace("_server", "_server/") +
-      `&args=${encodeURIComponent(JSON.stringify(props.values))}`
-    );
-  });
+  return (
+    getUrl() +
+    (img as any).url.replace("_server", "_server/") +
+    `&args=${encodeURIComponent(JSON.stringify(props.values))}`
+  );
 };
 
 export const GetMetaUrl = (link: {
   data: { name?: string | null; image?: string | null };
 }) => {
   if (!link || !link.data || !link.data?.image || !link.data.name) {
-    return () => "https://hackchat.dev/og.png";
+    return "https://hackchat.dev/og.png";
   }
   return DynamicImage1({
     values: [

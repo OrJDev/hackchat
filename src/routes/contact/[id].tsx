@@ -29,8 +29,8 @@ const Contact: VoidComponent = () => {
   return (
     <>
       <Title>HackChat - Contact Profile</Title>
-      <Meta property="og:image" content={url()} />
-      <Meta name="twitter:image" content={url()} />
+      <Meta property="og:image" content={url} />
+      <Meta name="twitter:image" content={url} />
 
       <main class="flex flex-col gap-5 w-full h-full items-center">
         <RenderPRPCData data={link.data} error={() => link.error}>
