@@ -6,7 +6,6 @@ const innerImg = (...args: any[]) => {
   "use server";
 
   const [r0, r1, r2, r3, r4, r5, r6, r7, r8] = args;
-  console.log(args);
   return createOpenGraphImage(
     <div style={r0}>
       <img referrerpolicy="no-referrer" src={r1} srcset={r2} style={r3} />

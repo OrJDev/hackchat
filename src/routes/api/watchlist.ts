@@ -16,11 +16,6 @@ export const POST: APIHandler = async (event) => {
     if (!session?.user) {
       return json({ error: "Unknown User" });
     }
-    console.log(
-      `The watchlist for ${session.user.name} is, ${session.user.contacts
-        .map((e) => e.user.name)
-        .join(", ")}`
-    );
     const authResponse = pusher.authenticateUser(socketId, {
       id: session.user.id,
       watchlist: session.user.contacts.map((e) => e.user.id),
