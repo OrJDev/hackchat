@@ -262,7 +262,7 @@ export const ContactsProvider: ParentComponent = (props) => {
         };
         localStorage.setItem(
           `${messagePreifx}${s.id}`,
-          JSON.stringify(newMessages)
+          JSON.stringify(newMessages[s.id])
         );
         return newMessages;
       });
