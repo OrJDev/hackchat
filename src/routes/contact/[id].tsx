@@ -30,15 +30,23 @@ const Contact: VoidComponent = () => {
       <Title>HackChat - Contact Profile</Title>
       <Meta
         name="twitter:image"
-        content={`${getUrl()}/api/contact-image?name=${link.data?.name}&image=${
-          link.data?.image
-        }`}
+        content={
+          link.data
+            ? `${getUrl()}/api/contact-image?name=${link.data?.name}&image=${
+                link.data?.image
+              }`
+            : "https://hackchat.dev/og.png"
+        }
       />
       <Meta
         property="og:image"
-        content={`${getUrl()}/api/contact-image?name=${link.data?.name}&image=${
-          link.data?.image
-        }`}
+        content={
+          link.data
+            ? `${getUrl()}/api/contact-image?name=${link.data?.name}&image=${
+                link.data?.image
+              }`
+            : "https://hackchat.dev/og.png"
+        }
       />
 
       <main class="flex flex-col gap-5 w-full h-full items-center">

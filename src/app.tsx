@@ -33,8 +33,6 @@ export default function App() {
             name="twitter:description"
             content="Secured RealTime Chat App"
           />
-          <Meta property="og:image" content="https://hackchat.dev/og.png" />
-          <Meta name="twitter:image" content="https://hackchat.dev/og.png" />
 
           <Title>HackChat</Title>
           <SessionProvider>
@@ -78,6 +76,12 @@ const WithStyling: ParentComponent = (props) => {
         );
       }}
     >
+      {!location.pathname.startsWith("/contact/") ? (
+        <>
+          <Meta property="og:image" content="https://hackchat.dev/og.png" />
+          <Meta name="twitter:image" content="https://hackchat.dev/og.png" />
+        </>
+      ) : null}
       <div
         class={`h-screen w-screen ${
           location.pathname === "/dashboard" ||
