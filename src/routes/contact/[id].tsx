@@ -21,7 +21,9 @@ const Contact: VoidComponent = () => {
   const params = useParams<{ id: string }>();
   const link = getContactLink(
     () => ({ id: params.id }),
-    () => ({ deferStream: true })
+    () => ({
+      deferStream: true,
+    })
   );
   const auth = useAuth();
   const acceptLink = acceptContact();
@@ -161,6 +163,7 @@ const MetaImage: Component<{
         <img
           referrerpolicy="no-referrer"
           src={props.data?.image!}
+          srcSet={props.data.image!}
           style={{
             height: "150",
             width: "150",

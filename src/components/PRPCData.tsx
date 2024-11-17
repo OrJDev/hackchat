@@ -9,13 +9,11 @@ export const RenderPRPCData = <T extends object>(props: {
 }) => {
   return (
     <Show
-      when={props.error?.()}
-      fallback={<RenderChildren children={props.children} />}
-    >
-      {(err) => (
+      when={props.data}
+      fallback={
         <>
           <div class="font-bold text-red-500 text-xl bg-zinc-900 rounded-lg p-3 flex items-center justify-center my-12">
-            <p>{err().message ?? "Something Went Wrong"}</p>
+            <p>{props.error?.()?.message ?? "Something Went Wrong"}</p>
           </div>
           <A
             href="/dashboard"
@@ -27,7 +25,9 @@ export const RenderPRPCData = <T extends object>(props: {
             Go Home
           </A>
         </>
-      )}
+      }
+    >
+      <RenderChildren children={props.children} />
     </Show>
   );
 };
