@@ -19,7 +19,10 @@ import { useAuth } from "@solid-mediakit/auth/client";
 
 const Contact: VoidComponent = () => {
   const params = useParams<{ id: string }>();
-  const link = getContactLink(() => ({ id: params.id }));
+  const link = getContactLink(
+    () => ({ id: params.id }),
+    () => ({ deferStream: true })
+  );
   const auth = useAuth();
   const acceptLink = acceptContact();
 
