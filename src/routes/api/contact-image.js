@@ -1,9 +1,15 @@
 import { createOpenGraphImage } from "@solid-mediakit/og/server";
+import { getUrl } from "../../utils/url";
 
-export const GET = (event) => {
+const fontBold = fetch(`${getUrl()}/Helvetica-Bold.ttf`).then((res) =>
+  res.arrayBuffer()
+);
+
+export const GET = async (event) => {
   const url = new URL(event.request.url);
   const name = url.searchParams.get("name");
   const image = url.searchParams.get("image");
+  const fontBoldData = await fontBold;
 
   const args = [
     {
@@ -15,6 +21,7 @@ export const GET = (event) => {
       "justify-content": "center",
       "background-color": "#000",
       "font-size": "32",
+      fontFamily: "FontBold",
     },
     image,
     image,
@@ -47,14 +54,17 @@ export const GET = (event) => {
       "text-decoration-style": "dotted",
       "text-decoration-line": "underline",
       "text-decoration-color": "white",
-      "font-weight": "bold",
       "font-size": "50",
     },
     name,
     {
-      "font-weight": "400",
+      "font-weight": "850",
+      "font-family": "Arial",
       color: "white",
       "margin-top": "-20px",
+      display: "flex",
+      "flex-direction": "row",
+      gap: "4px",
     },
   ];
   const [r0, r1, r2, r3, r4, r5, r6, r7, r8] = args;
@@ -65,7 +75,35 @@ export const GET = (event) => {
         <h1 style={r5}>Add</h1>
         <span style={r6}>{r7}</span>
       </div>
-      <span style={r8}>On HackChat</span>
-    </div>
+      <span style={r8}>
+        Talk To{" "}
+        <span
+          style={{
+            color: "gray",
+          }}
+        >
+          {r7}
+        </span>{" "}
+        On HackChat
+      </span>
+      <strong
+        style={{
+          color: "darkgray",
+          marginTop: "30px",
+          fontSize: "25px",
+        }}
+      >
+        hackchat.dev
+      </strong>
+    </div>,
+    {
+      fonts: [
+        {
+          name: "FontBold",
+          data: fontBoldData,
+          style: "bold",
+        },
+      ],
+    }
   );
 };
