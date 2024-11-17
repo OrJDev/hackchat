@@ -2,36 +2,31 @@
 import { createOpenGraphImage } from "@solid-mediakit/og/server";
 import { getUrl } from "~/utils/url";
 
-const DynamicImage1 = (props: any) => {
-  const img = (...args: any[]) => {
-    "use server";
+const innerImg = (...args: any[]) => {
+  "use server";
 
-    const [r0, r1, r2, r3, r4, r5, r6, r7, r8] = args;
-    return createOpenGraphImage(
-      <div style={r0}>
-        <img referrerpolicy="no-referrer" src={r1} srcset={r2} style={r3} />
-        <div style={r4}>
-          <h1 style={r5}>Add</h1>
-          <span style={r6}>{r7}</span>
-        </div>
-        <span style={r8}>On HackChat</span>
+  const [r0, r1, r2, r3, r4, r5, r6, r7, r8] = args;
+  console.log(args);
+  return createOpenGraphImage(
+    <div style={r0}>
+      <img referrerpolicy="no-referrer" src={r1} srcset={r2} style={r3} />
+      <div style={r4}>
+        <h1 style={r5}>Add</h1>
+        <span style={r6}>{r7}</span>
       </div>
-    );
-  };
-  return (
-    getUrl() +
-    (img as any).url.replace("_server", "_server/") +
-    `&args=${encodeURIComponent(JSON.stringify(props.values))}`
+      <span style={r8}>On HackChat</span>
+    </div>
   );
 };
 
-export const GetMetaUrl = (link: {
-  data: { name?: string | null; image?: string | null };
+export const getContactOgURL = (link: {
+  name?: string | null;
+  image?: string | null;
 }) => {
-  if (!link || !link.data || !link.data?.image || !link.data.name) {
+  if (!link || !link.name || !link.image) {
     return "https://hackchat.dev/og.png";
   }
-  return DynamicImage1({
+  const props = {
     values: [
       {
         height: "100%",
@@ -43,8 +38,8 @@ export const GetMetaUrl = (link: {
         "background-color": "#000",
         "font-size": "32",
       },
-      link.data?.image,
-      link.data?.image,
+      link?.image,
+      link?.image,
       {
         height: "150",
         width: "150",
@@ -77,12 +72,18 @@ export const GetMetaUrl = (link: {
         "font-weight": "bold",
         "font-size": "50",
       },
-      link.data?.name,
+      link?.name,
       {
         "font-weight": "400",
         color: "white",
         "margin-top": "-20px",
       },
     ],
-  });
+  };
+
+  return (
+    getUrl() +
+    (innerImg as any).url.replace("_server", "_server/") +
+    `&args=${encodeURIComponent(JSON.stringify(props.values))}`
+  );
 };
