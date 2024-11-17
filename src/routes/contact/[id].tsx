@@ -31,7 +31,7 @@ const Contact: VoidComponent = () => {
       <Meta
         name="twitter:image"
         content={
-          link.data
+          link.data && link.data?.name && link.data?.image
             ? `${getUrl()}/api/contact-image?name=${link.data?.name}&image=${
                 link.data?.image
               }`
@@ -41,7 +41,7 @@ const Contact: VoidComponent = () => {
       <Meta
         property="og:image"
         content={
-          link.data
+          link.data && link.data?.name && link.data?.image
             ? `${getUrl()}/api/contact-image?name=${link.data?.name}&image=${
                 link.data?.image
               }`
