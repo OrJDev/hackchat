@@ -1,6 +1,4 @@
 import { withPRPC } from "@solid-mediakit/prpc-plugin";
-// @ts-expect-error
-import { vitePlugin as OGPlugin } from "@solid-mediakit/og/unplugin";
 
 const config = withPRPC(
   {

@@ -1,8 +1,8 @@
-import { Title } from "@solidjs/meta";
+import { Meta, Title } from "@solidjs/meta";
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Show, VoidComponent } from "solid-js";
 import toast from "solid-toast";
-import { RenderPRPCData, RenderUserImage } from "~/components";
+import { GetMetaUrl, RenderPRPCData, RenderUserImage } from "~/components";
 import { acceptContact, getContactLink } from "~/server/contacts";
 import { alterContacts } from "~/utils/contacts";
 import { wrapWithTry } from "~/utils/helpers";
@@ -24,9 +24,14 @@ const Contact: VoidComponent = () => {
 
   const setContacts = alterContacts();
 
+  const url = GetMetaUrl({ data: link.data! });
+
   return (
     <>
       <Title>HackChat - Contact Profile</Title>
+      <Meta property="og:image" content={url()} />
+      <Meta name="twitter:image" content={url()} />
+
       <main class="flex flex-col gap-5 w-full h-full items-center">
         <RenderPRPCData data={link.data} error={() => link.error}>
           <div class="w-full flex gap-2 items-center justify-center px-3 py-1 sm:py-3 sm:px-12">
